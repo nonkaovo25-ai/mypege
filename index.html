@@ -6,6 +6,7 @@
 <title>My Page ✦ AI秘書 Luna</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Maru+Gothic:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg:     #f8f5fb;
@@ -365,6 +366,31 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 </style>
 </head>
 <body>
+<!-- AUTH OVERLAY -->
+<div id="authOverlay" style="position:fixed;inset:0;background:rgba(46,32,64,.55);backdrop-filter:blur(14px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:var(--white);border:1px solid var(--lav3);border-radius:24px;padding:32px 26px;width:100%;max-width:360px;box-shadow:0 16px 56px rgba(120,90,168,.25);position:relative;animation:fadeUp .35s ease;">
+    <div style="position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--lav4),var(--lav2),var(--mauve),var(--lav2),var(--lav4));border-radius:24px 24px 0 0;"></div>
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--lav2));display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 18px rgba(197,174,232,.5);border:3px solid var(--white);margin-bottom:10px;">✦</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:var(--purple);letter-spacing:.1em;">My Page</div>
+      <div style="font-size:.62rem;color:var(--text3);letter-spacing:.22em;text-transform:uppercase;margin-top:2px;">Personal Dashboard · Luna</div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:18px;background:var(--bg);border-radius:12px;padding:4px;">
+      <button id="tabLogin" onclick="switchAuthTab('login')" style="flex:1;padding:8px;border:none;border-radius:9px;font-family:inherit;font-size:.78rem;cursor:pointer;background:var(--white);color:var(--purple);box-shadow:0 1px 8px var(--shadow);font-weight:500;transition:all .2s;">ログイン</button>
+      <button id="tabSignup" onclick="switchAuthTab('signup')" style="flex:1;padding:8px;border:none;border-radius:9px;font-family:inherit;font-size:.78rem;cursor:pointer;background:transparent;color:var(--text3);transition:all .2s;">新規登録</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input class="fc" type="email" id="authEmail" placeholder="メールアドレス" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('authPass').focus()">
+      <input class="fc" type="password" id="authPass" placeholder="パスワード（6文字以上）" autocomplete="current-password" onkeydown="if(event.key==='Enter')authSubmit()">
+      <div id="authError" style="font-size:.71rem;color:#c07878;min-height:18px;text-align:center;line-height:1.5;"></div>
+      <button class="btn-ok" id="authSubmitBtn" onclick="authSubmit()">ログイン ◆</button>
+    </div>
+    <div style="text-align:center;margin-top:14px;">
+      <span style="font-size:.62rem;color:var(--text3);">🎀 のりかの専用ダッシュボード</span>
+    </div>
+  </div>
+</div>
+
 <canvas id="decoCanvas"></canvas>
 <div class="app">
 
@@ -418,6 +444,10 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
       <div class="setting-row"><span>優先順位の自動整理</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row"><span>進捗アラート</span><div class="toggle on" id="alertToggle" onclick="this.classList.toggle('on');renderAlerts()"></div></div>
       <div class="setting-row"><span>週次レポート</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="setting-row" style="margin-top:4px;">
+        <span id="authUserEmail" style="font-size:.68rem;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未ログイン</span>
+        <button onclick="logout()" style="font-size:.68rem;font-family:inherit;color:var(--text3);background:transparent;border:1px solid var(--lav3);padding:4px 12px;border-radius:20px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--lav2)';this.style.color='var(--purple)'" onmouseout="this.style.borderColor='var(--lav3)';this.style.color='var(--text3)'">ログアウト</button>
+      </div>
     </div>
   </div>
 
@@ -670,6 +700,8 @@ function saveData(){
   try {
     localStorage.setItem('norikaGoals', JSON.stringify(goals));
     localStorage.setItem('norikaTasks', JSON.stringify(tasks));
+    queueSync('goals', goals);
+    queueSync('tasks', tasks);
   } catch(e) { console.warn('saveData error:', e); }
 }
 function clearDefaultData(){
@@ -971,7 +1003,7 @@ const HABITS=[
   {id:'h5',name:'💧 水2L飲んだ'},
 ];
 function loadHabits(){return JSON.parse(localStorage.getItem('norikaHabits')||'{}');}
-function saveHabits(d){localStorage.setItem('norikaHabits',JSON.stringify(d));}
+function saveHabits(d){localStorage.setItem('norikaHabits',JSON.stringify(d));queueSync('habits',d);}
 function toggleHabit(hid){
   const d=loadHabits();
   const today=getTodayStr();
@@ -1006,6 +1038,7 @@ function addWeight(){
   ws.sort((a,b)=>a.date.localeCompare(b.date));
   if(ws.length>60)ws.splice(0,ws.length-60);
   localStorage.setItem('norikaWeights',JSON.stringify(ws));
+  queueSync('weights',ws);
   document.getElementById('weightIn').value='';
   renderWeightChart();
 }
@@ -1064,6 +1097,7 @@ function addRevenue(){
   const data=loadRevenue();
   data.entries.push({date:getTodayStr(),amount,note});
   localStorage.setItem('norikaRevenue',JSON.stringify(data));
+  queueSync('revenue',data);
   document.getElementById('revIn').value='';document.getElementById('revNote').value='';
   renderRevenue();
 }
@@ -1099,7 +1133,7 @@ const DEFAULT_PRODUCTS=[
 let products=JSON.parse(localStorage.getItem('norikaProducts')||'null')||DEFAULT_PRODUCTS;
 let pCnt=Math.max(10,...products.map(p=>parseInt(p.id.replace('p',''))||0));
 let activeProduct=products[0]?.id||'p1';
-function saveProducts(){localStorage.setItem('norikaProducts',JSON.stringify(products));}
+function saveProducts(){localStorage.setItem('norikaProducts',JSON.stringify(products));queueSync('products',products);}
 function loadKanban(){return JSON.parse(localStorage.getItem('norikaKanban')||'{}');}
 function setActiveProduct(pid){activeProduct=pid;renderKanban();}
 function addProduct(){
@@ -1129,6 +1163,7 @@ function addKanbanTask(){
   if(!d[activeProduct][col])d[activeProduct][col]=[];
   d[activeProduct][col].push(txt);
   localStorage.setItem('norikaKanban',JSON.stringify(d));
+  queueSync('kanban',d);
   document.getElementById('kanbanIn').value='';
   renderKanban();
 }
@@ -1172,12 +1207,15 @@ function addInstaIdea(){
   const items=loadInsta();
   items.unshift({id:Date.now(),text:txt,tag,date:getTodayStr()});
   localStorage.setItem('norikaInsta',JSON.stringify(items));
+  queueSync('insta',items);
   document.getElementById('instaIn').value='';
   renderInsta();
 }
 function deleteInsta(id){
   const items=loadInsta().filter(i=>i.id!==id);
-  localStorage.setItem('norikaInsta',JSON.stringify(items));renderInsta();
+  localStorage.setItem('norikaInsta',JSON.stringify(items));
+  queueSync('insta',items);
+  renderInsta();
 }
 function renderInsta(){
   const items=loadInsta();const list=document.getElementById('instaList');list.innerHTML='';
@@ -1199,7 +1237,7 @@ function setMood(idx){
   const ex=moods.findIndex(m=>m.date===today);
   if(ex>=0)moods[ex].mood=idx;else moods.unshift({date:today,mood:idx});
   if(moods.length>30)moods.splice(30);
-  localStorage.setItem('norikaMoods',JSON.stringify(moods));renderMood();
+  localStorage.setItem('norikaMoods',JSON.stringify(moods));queueSync('moods',moods);renderMood();
 }
 function renderMood(){
   const moods=loadMoods();const today=getTodayStr();
@@ -1257,6 +1295,7 @@ function addSecretEntry(){
   const entries=loadSecretEntries();
   entries.unshift({text:txt,date:new Date().toLocaleString('ja-JP')});
   localStorage.setItem('norikaSecret',JSON.stringify(entries));
+  queueSync('secret',entries);
   document.getElementById('secretIn').value='';renderSecretEntries();
 }
 function renderSecretEntries(){
@@ -1268,10 +1307,141 @@ function renderSecretEntries(){
   });
 }
 
+// ══════════════════════════════════════════
+// ── AUTH & SUPABASE SYNC ──
+let sbClient = null;
+let currentUser = null;
+let _authMode = 'login';
+const _syncTimers = {};
+
+function renderAll(){
+  renderGoals();renderTasks();renderAlerts();
+  renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();
+}
+
+async function initSupabase(){
+  try{
+    const cfg = await fetch('/api/config').then(r=>r.json()).catch(()=>({}));
+    if(!cfg.supabaseUrl || !cfg.supabaseAnonKey){ hideAuthOverlay(); return; }
+    sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    const { data:{ session } } = await sbClient.auth.getSession();
+    if(session?.user){
+      currentUser = session.user;
+      document.getElementById('authUserEmail').textContent = currentUser.email;
+      hideAuthOverlay();
+      await loadAllFromSupabase();
+      renderAll();
+    }
+    sbClient.auth.onAuthStateChange(async(event, session)=>{
+      if(event==='SIGNED_IN' && session?.user){
+        currentUser = session.user;
+        document.getElementById('authUserEmail').textContent = currentUser.email;
+        hideAuthOverlay();
+        await loadAllFromSupabase();
+        renderAll();
+      } else if(event==='SIGNED_OUT'){
+        currentUser = null;
+        document.getElementById('authUserEmail').textContent = '未ログイン';
+      }
+    });
+  } catch(e){
+    console.warn('Supabase init error:',e);
+    hideAuthOverlay();
+  }
+}
+
+function showAuthOverlay(){ document.getElementById('authOverlay').style.display='flex'; }
+function hideAuthOverlay(){ document.getElementById('authOverlay').style.display='none'; }
+
+function switchAuthTab(mode){
+  _authMode = mode;
+  const isLogin = mode==='login';
+  const tl=document.getElementById('tabLogin'), ts=document.getElementById('tabSignup');
+  tl.style.background = isLogin ? 'var(--white)' : 'transparent';
+  tl.style.color = isLogin ? 'var(--purple)' : 'var(--text3)';
+  tl.style.boxShadow = isLogin ? '0 1px 8px var(--shadow)' : 'none';
+  ts.style.background = !isLogin ? 'var(--white)' : 'transparent';
+  ts.style.color = !isLogin ? 'var(--purple)' : 'var(--text3)';
+  ts.style.boxShadow = !isLogin ? '0 1px 8px var(--shadow)' : 'none';
+  document.getElementById('authSubmitBtn').textContent = isLogin ? 'ログイン ◆' : '登録する ◆';
+  const err=document.getElementById('authError');
+  err.textContent=''; err.style.color='#c07878';
+}
+
+async function authSubmit(){
+  const email=document.getElementById('authEmail').value.trim();
+  const pass=document.getElementById('authPass').value;
+  const errEl=document.getElementById('authError');
+  if(!email||!pass){ errEl.textContent='メールとパスワードを入力してね 💜'; return; }
+  if(pass.length<6){ errEl.textContent='パスワードは6文字以上にしてね'; return; }
+  const btn=document.getElementById('authSubmitBtn');
+  btn.textContent='処理中…'; errEl.textContent='';
+  try{
+    const result = _authMode==='login'
+      ? await sbClient.auth.signInWithPassword({email,password:pass})
+      : await sbClient.auth.signUp({email,password:pass});
+    if(result.error){
+      errEl.textContent = result.error.message.includes('Invalid login')
+        ? 'メールかパスワードが違うよ 💜' : result.error.message;
+      btn.textContent = _authMode==='login' ? 'ログイン ◆' : '登録する ◆';
+    } else if(_authMode==='signup' && !result.data.session){
+      errEl.style.color='var(--purple2)';
+      errEl.textContent='確認メールを送ったよ！メールをチェックしてね 💜';
+      btn.textContent='登録する ◆';
+    }
+  } catch(e){
+    errEl.textContent='エラーが起きたよ、もう一度試してね';
+    btn.textContent=_authMode==='login' ? 'ログイン ◆' : '登録する ◆';
+  }
+}
+
+async function logout(){
+  if(sbClient) await sbClient.auth.signOut();
+  currentUser = null;
+  ['norikaGoals','norikaTasks','norikaProducts','norikaHabits','norikaWeights',
+   'norikaRevenue','norikaKanban','norikaInsta','norikaMoods','norikaSecret']
+    .forEach(k=>localStorage.removeItem(k));
+  goals=[...DEFAULT_GOALS]; tasks=[...DEFAULT_TASKS]; products=[...DEFAULT_PRODUCTS];
+  renderAll();
+  showAuthOverlay();
+}
+
+async function loadAllFromSupabase(){
+  if(!sbClient||!currentUser) return;
+  try{
+    const {data,error}=await sbClient.from('mypage_data').select('key,value').eq('user_id',currentUser.id);
+    if(error||!data?.length) return;
+    const map={goals:'norikaGoals',tasks:'norikaTasks',products:'norikaProducts',
+      habits:'norikaHabits',weights:'norikaWeights',revenue:'norikaRevenue',
+      kanban:'norikaKanban',insta:'norikaInsta',moods:'norikaMoods',secret:'norikaSecret'};
+    data.forEach(r=>{ if(map[r.key]) localStorage.setItem(map[r.key],JSON.stringify(r.value)); });
+    goals = JSON.parse(localStorage.getItem('norikaGoals')||'null')||DEFAULT_GOALS;
+    tasks = JSON.parse(localStorage.getItem('norikaTasks')||'null')||DEFAULT_TASKS;
+    products = JSON.parse(localStorage.getItem('norikaProducts')||'null')||DEFAULT_PRODUCTS;
+    gCnt = Math.max(10,...goals.map(g=>parseInt(g.id.replace('g',''))||0));
+    tCnt = Math.max(20,...tasks.map(t=>parseInt(t.id.replace('t',''))||0));
+    pCnt = Math.max(10,...products.map(p=>parseInt(p.id.replace('p',''))||0));
+    if(!products.find(p=>p.id===activeProduct)) activeProduct=products[0]?.id||'p1';
+  } catch(e){ console.warn('loadAllFromSupabase error:',e); }
+}
+
+function queueSync(key,value){
+  if(!sbClient||!currentUser) return;
+  clearTimeout(_syncTimers[key]);
+  _syncTimers[key]=setTimeout(async()=>{
+    try{
+      await sbClient.from('mypage_data').upsert(
+        {user_id:currentUser.id,key,value,updated_at:new Date().toISOString()},
+        {onConflict:'user_id,key'}
+      );
+    } catch(e){ console.warn('queueSync error:',key,e); }
+  },800);
+}
+
 // ── INIT ──
 clearDefaultData();
-renderGoals();renderTasks();renderAlerts();
-renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();
+renderAll();
+initSupabase();
 </script>
 </body>
 </html>
