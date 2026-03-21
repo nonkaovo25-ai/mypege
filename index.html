@@ -207,6 +207,52 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(197,174,232,.4);border-radius:4px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .app{padding:0 14px 48px;}
+
+  /* header */
+  header{padding:32px 0 20px;}
+  .ribbon-line{width:90px;}
+  .site-title{font-size:1.6rem;}
+  .header-deco{letter-spacing:4px;}
+
+  /* luna banner */
+  .luna-banner{padding:14px 16px;gap:12px;}
+  .luna-banner::before{display:none;}
+  .luna-avatar{width:46px;height:46px;font-size:1.1rem;}
+
+  /* stats */
+  .stats{grid-template-columns:repeat(2,1fr);gap:8px;}
+
+  /* grid → 縦1列 */
+  .grid{grid-template-columns:1fr;}
+
+  /* matrix quad */
+  .mq-grid{grid-template-columns:1fr 1fr;gap:7px;}
+  .quad{padding:10px;min-height:100px;}
+  .ql{font-size:.6rem;}
+
+  /* task input row → 縦並び */
+  .task-row{flex-direction:column;}
+  .task-in{min-width:unset;width:100%;}
+  .custom-select{width:100%;}
+  .task-add-btn{width:100%;text-align:center;}
+
+  /* chat */
+  .chat-msgs{min-height:180px;max-height:240px;}
+  .qp-area{gap:5px;}
+  .qp{font-size:.63rem;padding:4px 9px;}
+
+  /* modal */
+  .modal{width:calc(100vw - 32px);padding:20px 16px;}
+}
+
+@media(max-width:400px){
+  .mq-grid{grid-template-columns:1fr;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
