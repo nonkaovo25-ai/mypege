@@ -209,8 +209,93 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(197,174,232,.4);border-radius:4px;}
 
+/* ── FEATURES SECTION ── */
+.features-section{display:flex;flex-direction:column;gap:20px;margin-top:20px;}
+.features-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+/* HABIT TRACKER */
+.habit-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(197,174,232,.2);}
+.habit-item:last-child{border-bottom:none;}
+.habit-check{width:30px;height:30px;border-radius:8px;border:2px solid var(--lav3);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s;flex-shrink:0;}
+.habit-check.checked{background:linear-gradient(135deg,var(--lav),var(--lav2));border-color:var(--lav2);color:white;}
+.habit-name{font-size:.82rem;color:var(--text);flex:1;}
+.habit-streak{font-size:.68rem;color:var(--lav2);background:rgba(197,174,232,.15);padding:2px 9px;border-radius:10px;white-space:nowrap;border:1px solid rgba(197,174,232,.3);}
+
+/* WEIGHT CHART */
+.weight-input-row{display:flex;gap:8px;margin-bottom:12px;}
+.weight-current{text-align:center;margin-bottom:10px;}
+.weight-big{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--purple);}
+.weight-goal-note{font-size:.65rem;color:var(--text3);margin-top:2px;}
+#weightCanvas{width:100%;display:block;}
+
+/* REVENUE */
+.rev-section{margin-bottom:14px;}
+.rev-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text2);margin-bottom:5px;}
+.rev-amount{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--purple);}
+.rev-bar{height:7px;background:var(--lav4);border-radius:10px;overflow:hidden;margin-bottom:3px;}
+.rev-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--lav),var(--lav2));transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+.rev-input-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+.rev-history{max-height:90px;overflow-y:auto;margin-top:10px;}
+.rev-entry{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text2);padding:4px 0;border-bottom:1px dashed rgba(197,174,232,.15);}
+.rev-entry:last-child{border-bottom:none;}
+
+/* PRODUCT KANBAN */
+.product-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.ptab{font-size:.7rem;padding:5px 13px;border-radius:20px;border:1px solid var(--lav3);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .2s;font-family:inherit;}
+.ptab.active{background:var(--lav4);border-color:var(--lav2);color:var(--purple);}
+.product-kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.kanban-col{background:var(--bg2);border:1px solid rgba(197,174,232,.22);border-radius:12px;padding:9px;min-height:70px;}
+.kanban-col-title{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;display:flex;align-items:center;gap:4px;}
+.kanban-task{background:var(--white);border:1px solid var(--lav3);border-radius:8px;padding:5px 8px;font-size:.73rem;color:var(--text);margin-bottom:4px;line-height:1.4;}
+.kanban-add-row{display:flex;gap:7px;flex-wrap:wrap;}
+
+/* INSTAGRAM MEMO */
+.insta-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px dashed rgba(197,174,232,.18);}
+.insta-item:last-child{border-bottom:none;}
+.insta-text{font-size:.78rem;color:var(--text);flex:1;line-height:1.4;}
+.insta-tag{font-size:.6rem;padding:2px 7px;border-radius:10px;background:rgba(197,174,232,.15);color:var(--purple2);border:1px solid rgba(197,174,232,.3);white-space:nowrap;flex-shrink:0;}
+.insta-del{opacity:0;flex-shrink:0;width:16px;height:16px;border-radius:50%;background:transparent;border:1px solid transparent;color:var(--text3);font-size:.55rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;font-family:inherit;}
+.insta-item:hover .insta-del{opacity:1;border-color:var(--lav3);}
+.insta-list{max-height:180px;overflow-y:auto;}
+.insta-add-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;}
+
+/* MOOD LOG */
+.mood-picker{display:flex;gap:6px;justify-content:space-around;margin:10px 0 14px;}
+.mood-btn{font-size:1.6rem;cursor:pointer;padding:6px;border-radius:50%;border:2px solid transparent;transition:all .2s;background:transparent;line-height:1;}
+.mood-btn.selected{border-color:var(--lav2);background:var(--lav4);transform:scale(1.2);}
+.mood-today{text-align:center;font-size:.72rem;color:var(--text2);margin-bottom:12px;}
+.mood-history-label{font-size:.62rem;color:var(--text3);margin-bottom:7px;letter-spacing:.08em;}
+.mood-history{display:flex;gap:4px;flex-wrap:wrap;}
+.mood-dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;border:1px solid var(--lav3);background:var(--white);}
+
+/* SECRET MEMO */
+.pin-screen{text-align:center;padding:10px 0 6px;}
+.pin-label{font-size:.72rem;color:var(--text2);margin-bottom:10px;}
+.pin-display{font-size:1.6rem;letter-spacing:14px;color:var(--purple);margin:10px 0;min-height:36px;}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:210px;margin:0 auto 10px;}
+.pin-key{padding:13px;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;font-family:inherit;font-size:.95rem;color:var(--text);cursor:pointer;transition:all .2s;}
+.pin-key:hover{background:var(--lav4);border-color:var(--lav2);}
+.pin-error{font-size:.7rem;color:#c87878;min-height:18px;margin-top:4px;}
+.secret-content{display:none;}
+.secret-content.unlocked{display:block;}
+.secret-entries{max-height:200px;overflow-y:auto;margin-bottom:12px;}
+.secret-item{background:rgba(197,174,232,.08);border:1px solid var(--lav3);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:.78rem;color:var(--text);line-height:1.55;position:relative;}
+.secret-date{font-size:.6rem;color:var(--text3);margin-bottom:4px;}
+.secret-add-row{display:flex;gap:7px;}
+.secret-in{flex:1;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;padding:9px 12px;font-family:inherit;font-size:.78rem;color:var(--text);outline:none;resize:none;transition:border-color .2s;min-height:38px;}
+.secret-in:focus{border-color:var(--lav2);background:var(--white);}
+.lock-btn{font-size:.68rem;font-family:inherit;color:var(--text3);background:transparent;border:1px solid var(--lav3);padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;margin-top:10px;}
+.lock-btn:hover{border-color:var(--lav2);color:var(--purple);}
+
 /* ── RESPONSIVE ── */
 @media(max-width:700px){
+  .features-row{grid-template-columns:1fr;}
+  .product-kanban{grid-template-columns:repeat(2,1fr);}
+  .kanban-add-row{flex-direction:column;}
+  .insta-add-row{flex-direction:column;}
+  .rev-input-row{flex-direction:column;}
+  .weight-input-row{flex-direction:row;}
+
   .app{padding:0 14px 48px;}
 
   /* header */
@@ -371,6 +456,142 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
   </div>
 </div>
 </div>
+
+<!-- ═══════════════ FEATURES SECTION ═══════════════ -->
+<div class="features-section">
+
+  <!-- ① 習慣トラッカー -->
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-label">習慣トラッカー</div>
+    <div id="habitList"></div>
+  </div>
+
+  <!-- ② 体重グラフ + ③ 売上トラッカー -->
+  <div class="features-row">
+    <div class="card" style="animation-delay:.15s">
+      <div class="card-label">体重グラフ</div>
+      <div class="weight-current">
+        <div class="weight-big" id="weightLatest">― kg</div>
+        <div class="weight-goal-note">🎯 目標：50kg（8月まで）</div>
+      </div>
+      <canvas id="weightCanvas" height="150"></canvas>
+      <div class="weight-input-row" style="margin-top:12px">
+        <input class="task-in" type="number" id="weightIn" placeholder="今日の体重 (kg)" step="0.1" min="30" max="200" style="flex:1">
+        <button class="task-add-btn" onclick="addWeight()">記録 ◆</button>
+      </div>
+    </div>
+
+    <div class="card" style="animation-delay:.2s">
+      <div class="card-label">売上トラッカー</div>
+      <div class="rev-section">
+        <div class="rev-label"><span>5月まで目標 <span class="rev-amount" id="revMonthly">0円</span></span><span id="revMonthlyPct">0%</span></div>
+        <div class="rev-bar"><div class="rev-fill" id="revMonthlyBar" style="width:0%"></div></div>
+        <div style="font-size:.62rem;color:var(--text3);text-align:right">目標：20万円</div>
+      </div>
+      <div class="rev-section">
+        <div class="rev-label"><span>今年の売上 <span class="rev-amount" id="revAnnual">0円</span></span><span id="revAnnualPct">0%</span></div>
+        <div class="rev-bar"><div class="rev-fill" id="revAnnualBar" style="width:0%;background:linear-gradient(90deg,var(--mauve),var(--purple2))"></div></div>
+        <div style="font-size:.62rem;color:var(--text3);text-align:right">目標：100万円</div>
+      </div>
+      <div class="rev-input-row">
+        <input class="task-in" type="number" id="revIn" placeholder="金額 (円)" style="flex:1;min-width:80px">
+        <input class="task-in" type="text" id="revNote" placeholder="メモ（任意）" style="flex:1.5;min-width:80px">
+        <button class="task-add-btn" onclick="addRevenue()">追加 ◆</button>
+      </div>
+      <div class="rev-history" id="revHistory"></div>
+    </div>
+  </div>
+
+  <!-- ④ プロダクト進捗ボード -->
+  <div class="card" style="animation-delay:.25s">
+    <div class="card-label">プロダクト進捗ボード</div>
+    <div class="product-tabs" id="productTabs"></div>
+    <div class="product-kanban">
+      <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:#c0a0d8;display:inline-block"></span>アイデア</div><div id="kcol-idea"></div></div>
+      <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:var(--lav2);display:inline-block"></span>開発中</div><div id="kcol-dev"></div></div>
+      <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:var(--mauve);display:inline-block"></span>テスト</div><div id="kcol-test"></div></div>
+      <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:#b4d2be;display:inline-block"></span>完成</div><div id="kcol-done"></div></div>
+    </div>
+    <div class="kanban-add-row">
+      <input class="task-in" type="text" id="kanbanIn" placeholder="タスクを追加… (Enter)" style="flex:1" onkeydown="if(event.key==='Enter')addKanbanTask()">
+      <select class="custom-select" id="kanbanCol">
+        <option value="idea">アイデア</option>
+        <option value="dev">開発中</option>
+        <option value="test">テスト</option>
+        <option value="done">完成</option>
+      </select>
+      <button class="task-add-btn" onclick="addKanbanTask()">追加 ◆</button>
+    </div>
+  </div>
+
+  <!-- ⑤ Instagram投稿メモ + ⑥ 気分ログ -->
+  <div class="features-row">
+    <div class="card" style="animation-delay:.3s">
+      <div class="card-label">Instagram 投稿メモ</div>
+      <div class="insta-list" id="instaList"></div>
+      <div class="insta-add-row">
+        <input class="task-in" type="text" id="instaIn" placeholder="投稿アイデアを追加… (Enter)" style="flex:1" onkeydown="if(event.key==='Enter')addInstaIdea()">
+        <select class="custom-select" id="instaTag">
+          <option value="投稿ネタ">投稿ネタ</option>
+          <option value="リール">リール</option>
+          <option value="ストーリー">ストーリー</option>
+          <option value="キャプション">キャプション</option>
+          <option value="ハッシュタグ">ハッシュタグ</option>
+        </select>
+        <button class="task-add-btn" onclick="addInstaIdea()">追加 ◆</button>
+      </div>
+    </div>
+
+    <div class="card" style="animation-delay:.35s">
+      <div class="card-label">気分ログ</div>
+      <div class="mood-today" id="moodToday">今日の気分は？</div>
+      <div class="mood-picker">
+        <button class="mood-btn" id="mood-0" onclick="setMood(0)" title="つらい">😭</button>
+        <button class="mood-btn" id="mood-1" onclick="setMood(1)" title="微妙">😕</button>
+        <button class="mood-btn" id="mood-2" onclick="setMood(2)" title="ふつう">😐</button>
+        <button class="mood-btn" id="mood-3" onclick="setMood(3)" title="いい感じ">😊</button>
+        <button class="mood-btn" id="mood-4" onclick="setMood(4)" title="最高">🥰</button>
+      </div>
+      <div class="mood-history-label">直近の記録</div>
+      <div class="mood-history" id="moodHistory"></div>
+    </div>
+  </div>
+
+  <!-- ⑦ 好きな人メモ（PIN付き） -->
+  <div class="card" style="animation-delay:.4s">
+    <div class="card-label">💜 ひみつのメモ</div>
+    <div id="pinScreen" class="pin-screen">
+      <div class="pin-label" id="pinLabel">PINを入力してね（初回は新しいPINを設定）</div>
+      <div class="pin-display" id="pinDisplay">○○○○</div>
+      <div class="pin-pad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">⌫</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">✕</button>
+      </div>
+      <div class="pin-error" id="pinError"></div>
+    </div>
+    <div class="secret-content" id="secretContent">
+      <div class="secret-entries" id="secretList"></div>
+      <div class="secret-add-row">
+        <textarea class="secret-in" id="secretIn" placeholder="気持ちを書いてみて… Lunaに相談することもできるよ 💜" rows="2"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addSecretEntry()}"></textarea>
+        <button class="task-add-btn" onclick="addSecretEntry()">追加 ◆</button>
+      </div>
+      <button class="lock-btn" onclick="lockSecret()">🔒 ロックする</button>
+    </div>
+  </div>
+
+</div>
+<!-- ═══════════════ / FEATURES SECTION ═══════════════ -->
 
 <!-- GOAL MODAL -->
 <div class="overlay" id="goalOverlay">
@@ -689,8 +910,287 @@ function aiSort(){
   callLuna(`現在の目標：${summary}。今日の優先順位とアドバイスをまとめて。`);
 }
 
+// ══════════════════════════════════════════
+// ── HELPERS ──
+function getTodayStr(){return new Date().toISOString().slice(0,10);}
+function fmtYen(n){return Number(n).toLocaleString()+'円';}
+
+// ══════════════════════════════════════════
+// ── ① 習慣トラッカー ──
+const HABITS=[
+  {id:'h1',name:'🍬 お菓子食べなかった'},
+  {id:'h2',name:'💃 ダンス練習'},
+  {id:'h3',name:'💻 パソコン開いた'},
+  {id:'h4',name:'🏋️ トレーニング'},
+  {id:'h5',name:'💧 水2L飲んだ'},
+];
+function loadHabits(){return JSON.parse(localStorage.getItem('norikaHabits')||'{}');}
+function saveHabits(d){localStorage.setItem('norikaHabits',JSON.stringify(d));}
+function toggleHabit(hid){
+  const d=loadHabits();
+  const today=getTodayStr();
+  const yest=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(!d[hid])d[hid]={streak:0,lastDate:null};
+  const h=d[hid];
+  if(h.lastDate===today){h.lastDate=yest;h.streak=Math.max(0,h.streak-1);}
+  else{h.streak=(h.lastDate===yest)?h.streak+1:1;h.lastDate=today;}
+  saveHabits(d);renderHabits();
+}
+function renderHabits(){
+  const d=loadHabits();const today=getTodayStr();
+  const list=document.getElementById('habitList');list.innerHTML='';
+  HABITS.forEach(h=>{
+    const hd=d[h.id]||{streak:0,lastDate:null};
+    const checked=hd.lastDate===today;
+    const div=document.createElement('div');div.className='habit-item';
+    div.innerHTML=`<button class="habit-check ${checked?'checked':''}" onclick="toggleHabit('${h.id}')">${checked?'✓':''}</button><div class="habit-name">${h.name}</div><div class="habit-streak">🔥 ${hd.streak}日</div>`;
+    list.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════
+// ── ② 体重グラフ ──
+function loadWeights(){return JSON.parse(localStorage.getItem('norikaWeights')||'[]');}
+function addWeight(){
+  const v=parseFloat(document.getElementById('weightIn').value);
+  if(!v||v<30||v>200)return;
+  const ws=loadWeights();const today=getTodayStr();
+  const idx=ws.findIndex(w=>w.date===today);
+  if(idx>=0)ws[idx].val=v;else ws.push({date:today,val:v});
+  ws.sort((a,b)=>a.date.localeCompare(b.date));
+  if(ws.length>60)ws.splice(0,ws.length-60);
+  localStorage.setItem('norikaWeights',JSON.stringify(ws));
+  document.getElementById('weightIn').value='';
+  renderWeightChart();
+}
+function renderWeightChart(){
+  const ws=loadWeights();
+  const canvas=document.getElementById('weightCanvas');
+  const W=canvas.width=canvas.offsetWidth||300;const H=canvas.height=150;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  if(ws.length===0){ctx.fillStyle='#a898c0';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('体重を記録してみよう！',W/2,H/2);return;}
+  document.getElementById('weightLatest').textContent=ws[ws.length-1].val+' kg';
+  const GOAL=50;
+  const vals=ws.map(w=>w.val);
+  const minV=Math.min(...vals,GOAL)-2;const maxV=Math.max(...vals)+2;
+  const pad={t:16,b:20,l:36,r:16};
+  const xS=(W-pad.l-pad.r)/Math.max(ws.length-1,1);
+  const yS=(H-pad.t-pad.b)/(maxV-minV);
+  const tx=i=>pad.l+i*xS;const ty=v=>H-pad.b-(v-minV)*yS;
+  // goal line
+  ctx.strokeStyle='rgba(197,174,232,.5)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,ty(GOAL));ctx.lineTo(W-pad.r,ty(GOAL));ctx.stroke();
+  ctx.setLineDash([]);ctx.fillStyle='rgba(176,154,216,.8)';ctx.font='10px sans-serif';ctx.textAlign='left';
+  ctx.fillText('50kg',pad.l+2,ty(GOAL)-3);
+  // y-axis labels
+  ctx.fillStyle='#a898c0';ctx.font='10px sans-serif';ctx.textAlign='right';
+  [Math.ceil(minV),Math.round((minV+maxV)/2),Math.floor(maxV)].forEach(v=>{ctx.fillText(v,pad.l-3,ty(v)+4);});
+  // area fill
+  if(ws.length>1){
+    ctx.beginPath();ctx.moveTo(tx(0),ty(ws[0].val));
+    ws.forEach((w,i)=>{if(i>0)ctx.lineTo(tx(i),ty(w.val));});
+    ctx.lineTo(tx(ws.length-1),H-pad.b);ctx.lineTo(tx(0),H-pad.b);ctx.closePath();
+    ctx.fillStyle='rgba(197,174,232,.12)';ctx.fill();
+  }
+  // line
+  ctx.strokeStyle='#b09ad8';ctx.lineWidth=2;ctx.beginPath();
+  ws.forEach((w,i)=>{i===0?ctx.moveTo(tx(i),ty(w.val)):ctx.lineTo(tx(i),ty(w.val));});
+  ctx.stroke();
+  // dots
+  ws.forEach((w,i)=>{
+    ctx.beginPath();ctx.arc(tx(i),ty(w.val),3.5,0,Math.PI*2);
+    ctx.fillStyle='#b09ad8';ctx.fill();ctx.strokeStyle='white';ctx.lineWidth=1.5;ctx.stroke();
+  });
+  // latest label
+  const last=ws[ws.length-1];
+  ctx.fillStyle='#7a5fa8';ctx.font='bold 11px sans-serif';ctx.textAlign='right';
+  ctx.fillText(last.val+'kg',W-pad.r,ty(last.val)-6);
+}
+
+// ══════════════════════════════════════════
+// ── ③ 売上トラッカー ──
+function loadRevenue(){return JSON.parse(localStorage.getItem('norikaRevenue')||'{"entries":[]}');}
+function addRevenue(){
+  const amount=parseInt(document.getElementById('revIn').value)||0;
+  if(!amount)return;
+  const note=document.getElementById('revNote').value.trim();
+  const data=loadRevenue();
+  data.entries.push({date:getTodayStr(),amount,note});
+  localStorage.setItem('norikaRevenue',JSON.stringify(data));
+  document.getElementById('revIn').value='';document.getElementById('revNote').value='';
+  renderRevenue();
+}
+function renderRevenue(){
+  const data=loadRevenue();
+  const thisMonth=getTodayStr().slice(0,7);const thisYear=getTodayStr().slice(0,4);
+  const monthly=data.entries.filter(e=>e.date.startsWith(thisMonth)).reduce((s,e)=>s+e.amount,0);
+  const annual=data.entries.filter(e=>e.date.startsWith(thisYear)).reduce((s,e)=>s+e.amount,0);
+  const mPct=Math.min(100,Math.round(monthly/200000*100));
+  const aPct=Math.min(100,Math.round(annual/1000000*100));
+  document.getElementById('revMonthly').textContent=fmtYen(monthly);
+  document.getElementById('revMonthlyPct').textContent=mPct+'%';
+  document.getElementById('revMonthlyBar').style.width=mPct+'%';
+  document.getElementById('revAnnual').textContent=fmtYen(annual);
+  document.getElementById('revAnnualPct').textContent=aPct+'%';
+  document.getElementById('revAnnualBar').style.width=aPct+'%';
+  const hist=document.getElementById('revHistory');hist.innerHTML='';
+  [...data.entries].reverse().slice(0,5).forEach(e=>{
+    const d=document.createElement('div');d.className='rev-entry';
+    d.innerHTML=`<span>${e.date} ${e.note||''}</span><span style="color:var(--purple);font-weight:500">+${fmtYen(e.amount)}</span>`;
+    hist.appendChild(d);
+  });
+}
+
+// ══════════════════════════════════════════
+// ── ④ プロダクト進捗ボード ──
+const PRODUCTS=[
+  {id:'p1',name:'👶 ままのとなり'},
+  {id:'p2',name:'👻 ghost sales'},
+  {id:'p3',name:'💪 AIトレーナー'},
+  {id:'p4',name:'📅 予約管理'},
+];
+let activeProduct='p1';
+function loadKanban(){return JSON.parse(localStorage.getItem('norikaKanban')||'{}');}
+function setActiveProduct(pid){activeProduct=pid;renderKanban();}
+function addKanbanTask(){
+  const txt=document.getElementById('kanbanIn').value.trim();
+  const col=document.getElementById('kanbanCol').value;
+  if(!txt)return;
+  const d=loadKanban();
+  if(!d[activeProduct])d[activeProduct]={};
+  if(!d[activeProduct][col])d[activeProduct][col]=[];
+  d[activeProduct][col].push(txt);
+  localStorage.setItem('norikaKanban',JSON.stringify(d));
+  document.getElementById('kanbanIn').value='';
+  renderKanban();
+}
+function renderKanban(){
+  const d=loadKanban();
+  const tabs=document.getElementById('productTabs');tabs.innerHTML='';
+  PRODUCTS.forEach(p=>{
+    const btn=document.createElement('button');btn.className='ptab'+(p.id===activeProduct?' active':'');
+    btn.textContent=p.name;btn.onclick=()=>setActiveProduct(p.id);tabs.appendChild(btn);
+  });
+  const pd=d[activeProduct]||{};
+  ['idea','dev','test','done'].forEach(col=>{
+    const el=document.getElementById('kcol-'+col);el.innerHTML='';
+    (pd[col]||[]).forEach(task=>{
+      const div=document.createElement('div');div.className='kanban-task';div.textContent=task;
+      el.appendChild(div);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// ── ⑤ Instagram投稿メモ ──
+function loadInsta(){return JSON.parse(localStorage.getItem('norikaInsta')||'[]');}
+function addInstaIdea(){
+  const txt=document.getElementById('instaIn').value.trim();
+  if(!txt)return;
+  const tag=document.getElementById('instaTag').value;
+  const items=loadInsta();
+  items.unshift({id:Date.now(),text:txt,tag,date:getTodayStr()});
+  localStorage.setItem('norikaInsta',JSON.stringify(items));
+  document.getElementById('instaIn').value='';
+  renderInsta();
+}
+function deleteInsta(id){
+  const items=loadInsta().filter(i=>i.id!==id);
+  localStorage.setItem('norikaInsta',JSON.stringify(items));renderInsta();
+}
+function renderInsta(){
+  const items=loadInsta();const list=document.getElementById('instaList');list.innerHTML='';
+  if(items.length===0){list.innerHTML='<div class="no-task">投稿アイデアを追加してみよう！</div>';return;}
+  items.slice(0,10).forEach(item=>{
+    const div=document.createElement('div');div.className='insta-item';
+    div.innerHTML=`<div class="insta-text">${item.text}</div><span class="insta-tag">${item.tag}</span><button class="insta-del" onclick="deleteInsta(${item.id})">✕</button>`;
+    list.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════
+// ── ⑥ 気分ログ ──
+const MOODS=['😭','😕','😐','😊','🥰'];
+const MOOD_LABELS=['つらい…','微妙','ふつう','いい感じ！','最高🥰'];
+function loadMoods(){return JSON.parse(localStorage.getItem('norikaMoods')||'[]');}
+function setMood(idx){
+  const today=getTodayStr();const moods=loadMoods();
+  const ex=moods.findIndex(m=>m.date===today);
+  if(ex>=0)moods[ex].mood=idx;else moods.unshift({date:today,mood:idx});
+  if(moods.length>30)moods.splice(30);
+  localStorage.setItem('norikaMoods',JSON.stringify(moods));renderMood();
+}
+function renderMood(){
+  const moods=loadMoods();const today=getTodayStr();
+  const todayMood=moods.find(m=>m.date===today);
+  MOODS.forEach((_,i)=>{const b=document.getElementById('mood-'+i);if(b)b.classList.toggle('selected',todayMood?.mood===i);});
+  document.getElementById('moodToday').textContent=todayMood!=null?`今日の気分：${MOODS[todayMood.mood]} ${MOOD_LABELS[todayMood.mood]}`:'今日の気分は？';
+  const hist=document.getElementById('moodHistory');hist.innerHTML='';
+  moods.slice(0,14).forEach(m=>{
+    const div=document.createElement('div');div.className='mood-dot';div.textContent=MOODS[m.mood];div.title=m.date;hist.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════
+// ── ⑦ 好きな人メモ（PIN付き） ──
+let pinInput='';let secretUnlocked=false;
+function loadSecretPin(){return localStorage.getItem('norikaPIN')||null;}
+function renderPinDisplay(){
+  document.getElementById('pinDisplay').textContent='●'.repeat(pinInput.length)+'○'.repeat(4-pinInput.length);
+}
+function pinPress(key){
+  document.getElementById('pinError').textContent='';
+  if(key==='del'){pinInput=pinInput.slice(0,-1);renderPinDisplay();return;}
+  if(pinInput.length>=4)return;
+  pinInput+=key;renderPinDisplay();
+  if(pinInput.length===4)setTimeout(checkPin,120);
+}
+function checkPin(){
+  const stored=loadSecretPin();
+  if(!stored){
+    localStorage.setItem('norikaPIN',pinInput);
+    document.getElementById('pinLabel').textContent='PINを設定したよ！覚えておいてね 💜';
+    setTimeout(showSecretContent,400);
+  } else if(pinInput===stored){
+    showSecretContent();
+  } else {
+    document.getElementById('pinError').textContent='PINが違うよ 💜 もう一度試してみて';
+    pinInput='';renderPinDisplay();
+  }
+}
+function showSecretContent(){
+  secretUnlocked=true;
+  document.getElementById('pinScreen').style.display='none';
+  document.getElementById('secretContent').classList.add('unlocked');
+  renderSecretEntries();
+}
+function lockSecret(){
+  secretUnlocked=false;pinInput='';
+  document.getElementById('pinScreen').style.display='block';
+  document.getElementById('secretContent').classList.remove('unlocked');
+  renderPinDisplay();
+}
+function loadSecretEntries(){return JSON.parse(localStorage.getItem('norikaSecret')||'[]');}
+function addSecretEntry(){
+  const txt=document.getElementById('secretIn').value.trim();if(!txt)return;
+  const entries=loadSecretEntries();
+  entries.unshift({text:txt,date:new Date().toLocaleString('ja-JP')});
+  localStorage.setItem('norikaSecret',JSON.stringify(entries));
+  document.getElementById('secretIn').value='';renderSecretEntries();
+}
+function renderSecretEntries(){
+  const entries=loadSecretEntries();const list=document.getElementById('secretList');list.innerHTML='';
+  if(entries.length===0){list.innerHTML='<div class="no-task" style="font-style:italic">ここだけのひみつを書いてみて 💜</div>';return;}
+  entries.forEach(e=>{
+    const div=document.createElement('div');div.className='secret-item';
+    div.innerHTML=`<div class="secret-date">${e.date}</div>${e.text}`;list.appendChild(div);
+  });
+}
+
 // ── INIT ──
 renderGoals();renderTasks();renderAlerts();
+renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();
 </script>
 </body>
 </html>
