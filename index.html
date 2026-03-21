@@ -640,8 +640,19 @@ let gCnt = Math.max(10, ...goals.map(g=>parseInt(g.id.replace('g',''))||0));
 let tCnt = Math.max(20, ...tasks.map(t=>parseInt(t.id.replace('t',''))||0));
 
 function saveData(){
-  localStorage.setItem('norikaGoals', JSON.stringify(goals));
-  localStorage.setItem('norikaTasks', JSON.stringify(tasks));
+  try {
+    localStorage.setItem('norikaGoals', JSON.stringify(goals));
+    localStorage.setItem('norikaTasks', JSON.stringify(tasks));
+  } catch(e) { console.warn('saveData error:', e); }
+}
+function clearDefaultData(){
+  // 初回のみデフォルトデータをlocalStorageに書き込む
+  if(!localStorage.getItem('norikaGoals')){
+    localStorage.setItem('norikaGoals', JSON.stringify(goals));
+  }
+  if(!localStorage.getItem('norikaTasks')){
+    localStorage.setItem('norikaTasks', JSON.stringify(tasks));
+  }
 }
 
 // ── DATE ──
@@ -1197,6 +1208,7 @@ function renderSecretEntries(){
 }
 
 // ── INIT ──
+clearDefaultData();
 renderGoals();renderTasks();renderAlerts();
 renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();
 </script>
