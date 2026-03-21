@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Page ✦ AI秘書 Luna</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Maru+Gothic:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #f8f5fb;
+  --bg2:    #f2edf8;
+  --white:  #fdfbff;
+  --lav:    #c5aee8;
+  --lav2:   #b09ad8;
+  --lav3:   #e4d8f5;
+  --lav4:   #ede5fa;
+  --purple: #7a5fa8;
+  --purple2:#9878c8;
+  --mauve:  #c8a8c8;
+  --silver: #d8d0e8;
+  --text:   #2e2040;
+  --text2:  #6a5580;
+  --text3:  #a898c0;
+  --shadow: rgba(120,90,168,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Maru Gothic',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 55% at 0% 5%,rgba(197,174,232,.22) 0%,transparent 55%),radial-gradient(ellipse 55% 45% at 100% 90%,rgba(200,168,200,.18) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 60% 30%,rgba(216,205,240,.15) 0%,transparent 60%);pointer-events:none;z-index:0;}
+#decoCanvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;}
+.app{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px 60px;}
+
+/* HEADER */
+header{text-align:center;padding:44px 0 28px;position:relative;}
+.header-ribbon{position:absolute;top:0;left:50%;transform:translateX(-50%);display:flex;align-items:center;}
+.ribbon-line{width:180px;height:2px;background:linear-gradient(90deg,transparent,var(--lav),var(--lav2));}
+.ribbon-line.rev{background:linear-gradient(90deg,var(--lav2),var(--lav),transparent);}
+.ribbon-center{font-size:1.1rem;color:var(--lav2);padding:0 10px;margin-top:-2px;}
+.site-title{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:300;color:var(--purple);letter-spacing:.16em;margin-bottom:3px;}
+.site-sub{font-size:.68rem;color:var(--text3);letter-spacing:.24em;text-transform:uppercase;}
+.header-deco{margin:12px 0 0;color:var(--lav);font-size:.85rem;letter-spacing:6px;}
+.date-pill{display:inline-flex;align-items:center;gap:8px;margin-top:13px;padding:6px 20px;background:var(--white);border:1px solid var(--lav3);border-radius:30px;font-size:.74rem;color:var(--text2);box-shadow:0 2px 14px var(--shadow);}
+.date-dot{width:6px;height:6px;border-radius:50%;background:var(--lav2);animation:blink 2.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* LUNA BANNER */
+.luna-banner{background:linear-gradient(135deg,var(--lav4) 0%,var(--white) 50%,rgba(200,168,200,.12) 100%);border:1px solid var(--lav3);border-radius:22px;padding:20px 26px;margin-bottom:16px;display:flex;align-items:center;gap:18px;box-shadow:0 4px 28px var(--shadow);position:relative;overflow:hidden;}
+.luna-banner::before{content:'◆  ◇  ◆  ◇  ◆';position:absolute;right:26px;top:50%;transform:translateY(-50%);font-size:.75rem;color:rgba(197,174,232,.28);letter-spacing:6px;pointer-events:none;}
+.luna-avatar{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--lav2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;box-shadow:0 4px 18px rgba(197,174,232,.5);border:3px solid var(--white);position:relative;}
+.luna-avatar::after{content:'🎀';position:absolute;top:-6px;right:-6px;font-size:.85rem;}
+.luna-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:300;color:var(--purple);margin-bottom:2px;}
+.luna-desc{font-size:.72rem;color:var(--text2);line-height:1.6;}
+.luna-online{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:.66rem;color:var(--lav2);background:rgba(197,174,232,.15);padding:2px 10px;border-radius:20px;border:1px solid rgba(197,174,232,.35);}
+
+/* ALERTS */
+.luna-alert{background:linear-gradient(135deg,rgba(197,174,232,.15),rgba(200,168,200,.1));border:1px solid rgba(197,174,232,.4);border-radius:16px;padding:12px 15px;margin-bottom:12px;display:flex;gap:11px;align-items:flex-start;animation:fadeUp .4s ease;cursor:pointer;transition:opacity .2s;}
+.luna-alert:hover{opacity:.82;}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.alert-body{flex:1;}
+.alert-title{font-size:.71rem;font-weight:500;margin-bottom:2px;}
+.alert-text{font-size:.71rem;color:var(--text2);line-height:1.5;}
+.alert-close{font-size:.68rem;color:var(--text3);cursor:pointer;padding:2px 7px;border-radius:8px;border:none;background:transparent;transition:background .15s;flex-shrink:0;font-family:inherit;}
+.alert-close:hover{background:rgba(197,174,232,.2);}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:var(--white);border:1px solid var(--lav3);border-radius:18px;padding:15px 12px;text-align:center;box-shadow:0 2px 14px var(--shadow);transition:transform .2s;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lav3),var(--lav2),var(--lav3));}
+.stat:hover{transform:translateY(-3px);}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:300;color:var(--purple);line-height:1;margin-bottom:4px;}
+.stat-lbl{font-size:.65rem;color:var(--text3);letter-spacing:.06em;}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:280px 1fr;gap:20px;}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--lav3);border-radius:20px;padding:20px;box-shadow:0 4px 24px var(--shadow);position:relative;overflow:hidden;animation:fadeUp .45s ease both;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--lav4),var(--lav2),var(--mauve),var(--lav2),var(--lav4));}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card-label{font-size:.63rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.card-label::before{content:'◆';font-size:.5rem;color:var(--lav2);}
+
+/* GOALS */
+.goal-item{padding:12px 0;border-bottom:1px dashed rgba(197,174,232,.3);position:relative;cursor:pointer;transition:all .18s;border-radius:0;}
+.goal-item:last-child{border-bottom:none;}
+.goal-item:hover{background:rgba(197,174,232,.05);padding-left:6px;padding-right:6px;border-radius:10px;}
+.goal-item.active-filter{background:rgba(197,174,232,.1);padding-left:6px;padding-right:6px;border-radius:10px;}
+.goal-header{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+.goal-color-dot{width:8px;height:8px;border-radius:2px;transform:rotate(45deg);flex-shrink:0;}
+.goal-name-text{font-size:.81rem;color:var(--text);font-weight:500;flex:1;line-height:1.35;}
+.goal-task-badge{font-size:.62rem;color:var(--text3);background:rgba(197,174,232,.15);padding:1px 7px;border-radius:10px;border:1px solid rgba(197,174,232,.28);white-space:nowrap;}
+.goal-bar{height:5px;background:var(--lav4);border-radius:10px;overflow:hidden;}
+.goal-fill{height:100%;border-radius:10px;transition:width 1s cubic-bezier(.34,1.56,.64,1);}
+.goal-meta{display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;color:var(--text3);}
+.goal-pct{font-weight:500;}
+.goal-del{position:absolute;top:50%;right:0;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:rgba(197,174,232,.1);border:1px solid var(--lav3);color:var(--text3);font-size:.62rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:all .18s;line-height:1;font-family:inherit;}
+.goal-item:hover .goal-del,.goal-item.active-filter .goal-del{opacity:1;}
+.goal-del:hover{background:rgba(180,120,180,.2);border-color:var(--mauve);color:var(--purple);}
+.filter-hint{font-size:.66rem;color:var(--text3);margin-bottom:10px;opacity:.7;}
+.filter-clear-btn{width:100%;margin-top:10px;padding:8px;background:rgba(197,174,232,.1);border:1px solid rgba(197,174,232,.35);border-radius:13px;font-family:inherit;font-size:.74rem;color:var(--lav2);cursor:pointer;transition:all .2s;display:none;}
+.filter-clear-btn:hover{background:rgba(197,174,232,.22);}
+.filter-clear-btn.show{display:block;}
+.add-goal-btn{width:100%;margin-top:10px;padding:9px;background:transparent;border:1.5px dashed var(--lav3);border-radius:13px;font-family:inherit;font-size:.77rem;color:var(--text3);cursor:pointer;transition:all .2s;letter-spacing:.04em;}
+.add-goal-btn:hover{border-color:var(--lav2);color:var(--lav2);background:rgba(197,174,232,.06);}
+
+/* SETTINGS */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed rgba(197,174,232,.22);font-size:.78rem;color:var(--text2);}
+.setting-row:last-child{border-bottom:none;}
+.toggle{width:34px;height:18px;border-radius:20px;background:var(--silver);position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;}
+.toggle.on{background:var(--lav2);}
+.toggle::after{content:'';position:absolute;width:12px;height:12px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+.toggle.on::after{transform:translateX(16px);}
+
+/* MATRIX */
+.matrix-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap;}
+.matrix-title{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:300;color:var(--purple);letter-spacing:.06em;}
+.matrix-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.filter-badge{display:none;align-items:center;gap:5px;font-size:.68rem;padding:3px 10px;border-radius:20px;border:1px solid rgba(197,174,232,.4);color:var(--purple2);background:rgba(197,174,232,.12);}
+.filter-badge.show{display:inline-flex;}
+.fbdot{width:7px;height:7px;border-radius:2px;transform:rotate(45deg);}
+.ai-btn{font-size:.71rem;font-family:inherit;color:var(--lav2);background:rgba(197,174,232,.15);border:1px solid rgba(197,174,232,.45);padding:5px 13px;border-radius:20px;cursor:pointer;transition:all .2s;}
+.ai-btn:hover{background:rgba(197,174,232,.3);border-color:var(--lav2);}
+.mq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.quad{background:var(--bg2);border:1.5px solid rgba(197,174,232,.28);border-radius:16px;padding:13px;min-height:130px;}
+.quad-urgent{border-color:rgba(192,160,216,.45);background:rgba(232,220,250,.2);}
+.quad-schedule{border-color:rgba(200,168,200,.4);background:rgba(240,228,244,.2);}
+.quad-delegate{border-color:rgba(197,174,232,.3);background:rgba(248,245,254,.3);}
+.quad-elim{border-color:rgba(210,205,220,.3);background:rgba(245,242,250,.2);}
+.ql{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.qld{width:6px;height:6px;border-radius:1px;transform:rotate(45deg);flex-shrink:0;}
+
+/* TASKS */
+.task{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(197,174,232,.12);cursor:pointer;transition:opacity .2s;user-select:none;}
+.task:last-child{border-bottom:none;}
+.task.hidden{display:none;}
+.tcb{width:15px;height:15px;border-radius:3px;transform:rotate(45deg);border:1.5px solid var(--silver);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;background:var(--white);}
+.task.done .tcb{background:var(--lav2);border-color:var(--lav2);}
+.task.done .tcb::after{content:'✓';font-size:7px;color:white;transform:rotate(-45deg);display:block;}
+.task.done .ttxt{text-decoration:line-through;opacity:.38;}
+.ttxt{font-size:.79rem;color:var(--text);line-height:1.4;}
+.task-gtag{display:inline-flex;align-items:center;gap:4px;font-size:.59rem;padding:1px 7px;border-radius:10px;margin-top:2px;}
+.tgdot{width:5px;height:5px;border-radius:1px;transform:rotate(45deg);flex-shrink:0;}
+.no-task{font-size:.71rem;color:var(--text3);padding:6px 0;font-style:italic;}
+.task-del{opacity:0;flex-shrink:0;margin-left:auto;width:18px;height:18px;border-radius:50%;background:transparent;border:1px solid transparent;color:var(--text3);font-size:.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;font-family:inherit;line-height:1;}
+.task:hover .task-del{opacity:1;border-color:var(--lav3);background:rgba(197,174,232,.1);}
+.task-del:hover{background:rgba(180,120,180,.2)!important;border-color:var(--mauve)!important;color:var(--purple)!important;}
+
+/* TASK INPUT */
+.task-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.task-in{flex:1;min-width:120px;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;padding:9px 12px;font-family:inherit;font-size:.78rem;color:var(--text);outline:none;transition:border-color .2s;}
+.task-in::placeholder{color:var(--text3);}
+.task-in:focus{border-color:var(--lav2);background:var(--white);}
+.custom-select{background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;padding:9px 28px 9px 12px;font-family:inherit;font-size:.78rem;color:var(--text2);outline:none;cursor:pointer;transition:border-color .2s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a898c0'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;}
+.custom-select:focus{border-color:var(--lav2);}
+.task-add-btn{padding:9px 15px;background:linear-gradient(135deg,var(--lav),var(--lav2));border:none;border-radius:12px;font-family:inherit;font-size:.78rem;color:white;cursor:pointer;transition:opacity .2s;box-shadow:0 2px 12px rgba(197,174,232,.4);white-space:nowrap;}
+.task-add-btn:hover{opacity:.85;}
+
+/* CHAT */
+.chat-card{background:var(--white);border:1px solid var(--lav3);border-radius:20px;overflow:hidden;box-shadow:0 4px 24px var(--shadow);display:flex;flex-direction:column;}
+.chat-head{background:linear-gradient(135deg,var(--lav4),rgba(200,168,200,.15));padding:14px 20px;border-bottom:1px solid var(--lav3);display:flex;align-items:center;gap:10px;position:relative;}
+.chat-head::after{content:'🎀';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:1.05rem;opacity:.5;}
+.ch-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--lav2));display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;border:2px solid var(--white);box-shadow:0 2px 8px rgba(197,174,232,.4);}
+.ch-name{font-family:'Cormorant Garamond',serif;font-size:.95rem;color:var(--purple);}
+.ch-sub{font-size:.63rem;color:var(--text3);}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:210px;max-height:290px;}
+.msg{max-width:90%;padding:10px 13px;border-radius:16px;font-size:.78rem;line-height:1.6;animation:msgIn .28s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg-luna{background:var(--lav4);border:1px solid var(--lav3);align-self:flex-start;border-bottom-left-radius:4px;}
+.msg-user{background:linear-gradient(135deg,rgba(197,174,232,.2),rgba(200,168,200,.2));border:1px solid rgba(197,174,232,.35);align-self:flex-end;border-bottom-right-radius:4px;color:var(--purple);}
+.msg-time{font-size:.58rem;color:var(--text3);margin-top:3px;}
+.typing{background:var(--lav4);border:1px solid var(--lav3);align-self:flex-start;border-radius:16px;border-bottom-left-radius:4px;padding:11px 15px;display:none;gap:4px;align-items:center;}
+.typing.show{display:flex;}
+.td{width:5px;height:5px;border-radius:50%;background:var(--lav2);animation:tda 1.2s ease-in-out infinite;}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes tda{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.qp-area{padding:10px 14px 0;display:flex;gap:6px;flex-wrap:wrap;}
+.qp{font-size:.65rem;font-family:inherit;padding:4px 10px;border-radius:20px;background:var(--bg);border:1px solid var(--lav3);color:var(--text2);cursor:pointer;transition:all .2s;}
+.qp:hover{background:var(--lav4);border-color:var(--lav2);color:var(--purple);}
+.cin-area{padding:10px 14px 14px;display:flex;gap:8px;border-top:1px solid rgba(197,174,232,.2);margin-top:10px;}
+.cin{flex:1;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;padding:9px 12px;font-family:inherit;font-size:.78rem;color:var(--text);outline:none;resize:none;transition:border-color .2s;min-height:38px;max-height:90px;}
+.cin::placeholder{color:var(--text3);}
+.cin:focus{border-color:var(--lav2);background:var(--white);}
+.send-btn{width:38px;height:38px;flex-shrink:0;background:linear-gradient(135deg,var(--lav),var(--lav2));border:none;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(197,174,232,.4);transition:opacity .2s;}
+.send-btn:hover{opacity:.85;}
+.send-btn svg{width:15px;height:15px;fill:white;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(46,32,64,.28);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--white);border:1px solid var(--lav3);border-radius:24px;padding:28px;width:410px;box-shadow:0 12px 48px rgba(120,90,168,.18);animation:msgIn .28s ease;position:relative;}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(--lav4),var(--lav2),var(--mauve),var(--lav2),var(--lav4));border-radius:24px 24px 0 0;}
+.modal::after{content:'🎀';position:absolute;top:15px;right:18px;font-size:1.1rem;opacity:.4;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--purple);margin-bottom:18px;}
+.fg{margin-bottom:12px;}
+.fl{display:block;font-size:.67rem;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;}
+.fc{width:100%;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;padding:10px 13px;font-family:inherit;font-size:.81rem;color:var(--text);outline:none;transition:border-color .2s;}
+.fc:focus{border-color:var(--lav2);}
+.color-row{display:flex;gap:9px;margin-top:4px;}
+.col-opt{width:24px;height:24px;border-radius:6px;border:2.5px solid transparent;cursor:pointer;transform:rotate(45deg);transition:all .18s;}
+.col-opt.sel{border-color:var(--purple);transform:rotate(45deg) scale(1.25);}
+.mbtns{display:flex;gap:10px;margin-top:18px;}
+.btn-ok{flex:1;padding:10px;background:linear-gradient(135deg,var(--lav),var(--lav2));border:none;border-radius:12px;font-family:inherit;font-size:.81rem;color:white;cursor:pointer;box-shadow:0 2px 10px rgba(197,174,232,.4);}
+.btn-ok:hover{opacity:.85;}
+.btn-ng{flex:1;padding:10px;background:transparent;border:1.5px solid var(--lav3);border-radius:12px;font-family:inherit;font-size:.81rem;color:var(--text3);cursor:pointer;transition:all .2s;}
+.btn-ng:hover{border-color:var(--lav2);color:var(--purple);}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(197,174,232,.4);border-radius:4px;}
+</style>
+</head>
+<body>
+<canvas id="decoCanvas"></canvas>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="header-ribbon">
+    <div class="ribbon-line"></div><div class="ribbon-center">🎀</div><div class="ribbon-line rev"></div>
+  </div>
+  <div class="site-title">My Page</div>
+  <div class="site-sub">Personal Dashboard · AI Secretary</div>
+  <div class="header-deco">◆ ◇ ◆ ◇ ◆ ◇ ◆</div>
+  <div><div class="date-pill"><div class="date-dot"></div><span id="dateDisp"></span></div></div>
+</header>
+
+<!-- LUNA BANNER -->
+<div class="luna-banner">
+  <div class="luna-avatar">✦</div>
+  <div>
+    <div class="luna-name">Luna</div>
+    <div class="luna-desc">あなた専属のAI秘書です。目標・タスクを紐づけて、毎日をサポートします ✨</div>
+    <div class="luna-online"><span style="width:5px;height:5px;border-radius:50%;background:var(--lav2);display:inline-block;"></span>オンライン中</div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div id="alertArea"></div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="sDone">0</div><div class="stat-lbl">完了タスク</div></div>
+  <div class="stat"><div class="stat-num" id="sLeft">0</div><div class="stat-lbl">残りタスク</div></div>
+  <div class="stat"><div class="stat-num" id="sRate">―</div><div class="stat-lbl">今週の達成率</div></div>
+  <div class="stat"><div class="stat-num" style="font-size:1.4rem">◆ 3</div><div class="stat-lbl">継続日数</div></div>
+</div>
+
+<!-- GRID -->
+<div class="grid">
+
+  <!-- LEFT -->
+  <div style="display:flex;flex-direction:column;gap:18px;">
+    <div class="card">
+      <div class="card-label">目標</div>
+      <div class="filter-hint">クリックでタスクを絞り込み</div>
+      <div id="goalList"></div>
+      <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilter()">✕ 絞り込みを解除する</button>
+      <button class="add-goal-btn" onclick="openGoalModal()">◇ 目標を追加</button>
+    </div>
+    <div class="card">
+      <div class="card-label">Luna 設定</div>
+      <div class="setting-row"><span>朝のブリーフィング</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="setting-row"><span>優先順位の自動整理</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="setting-row"><span>進捗アラート</span><div class="toggle on" id="alertToggle" onclick="this.classList.toggle('on');renderAlerts()"></div></div>
+      <div class="setting-row"><span>週次レポート</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div style="display:flex;flex-direction:column;gap:18px;">
+    <div class="card">
+      <div class="matrix-head">
+        <div class="matrix-title">◆ 優先順位マトリクス</div>
+        <div class="matrix-right">
+          <div class="filter-badge" id="filterBadge"><div class="fbdot" id="fbDot"></div><span id="fbText"></span></div>
+          <button class="ai-btn" onclick="aiSort()">🎀 Lunaに整理してもらう</button>
+        </div>
+      </div>
+      <div class="mq-grid">
+        <div class="quad quad-urgent"><div class="ql"><div class="qld" style="background:#c0a0d8"></div>今すぐやる</div><div id="q1"></div></div>
+        <div class="quad quad-schedule"><div class="ql"><div class="qld" style="background:var(--mauve)"></div>スケジュールに入れる</div><div id="q2"></div></div>
+        <div class="quad quad-delegate"><div class="ql"><div class="qld" style="background:var(--lav2)"></div>委任・後回し</div><div id="q3"></div></div>
+        <div class="quad quad-elim"><div class="ql"><div class="qld" style="background:var(--silver)"></div>不要 / 削除検討</div><div id="q4"></div></div>
+      </div>
+      <div class="task-row">
+        <input class="task-in" type="text" id="tIn" placeholder="タスクを追加… (Enter)" onkeydown="if(event.key==='Enter')addTask()">
+        <select class="custom-select" id="tGoal"><option value="">目標なし</option></select>
+        <select class="custom-select" id="tQuad">
+          <option value="q1">今すぐ</option>
+          <option value="q2" selected>スケジュール</option>
+          <option value="q3">委任</option>
+          <option value="q4">削除検討</option>
+        </select>
+        <button class="task-add-btn" onclick="addTask()">追加 ◆</button>
+      </div>
+    </div>
+
+    <div class="chat-card">
+      <div class="chat-head">
+        <div class="ch-av">✦</div>
+        <div><div class="ch-name">Luna</div><div class="ch-sub">AI Personal Secretary</div></div>
+      </div>
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="msg msg-luna">
+          こんにちは！✨ 目標とタスクが紐づくようになりました🎀<br><br>
+          サイドバーの目標をクリックすると、そのタスクだけ絞り込んで見られますよ。進捗が遅い目標はアラートでお知らせします 💜
+          <div class="msg-time">開始時</div>
+        </div>
+      </div>
+      <div class="typing" id="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+      <div class="qp-area">
+        <button class="qp" onclick="qsend('今日の優先順位を教えて')">今日の優先順位</button>
+        <button class="qp" onclick="qsend('全目標の進捗を確認して')">進捗確認</button>
+        <button class="qp" onclick="qsend('今週を振り返ってまとめて')">週次振り返り</button>
+        <button class="qp" onclick="qsend('モチベーション上げて！')">励まして！ ◆</button>
+      </div>
+      <div class="cin-area">
+        <textarea class="cin" id="cin" placeholder="Lunaに話しかける…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="overlay" id="goalOverlay">
+  <div class="modal">
+    <div class="modal-title">◆ 新しい目標を追加</div>
+    <div class="fg"><label class="fl">目標タイトル</label><input class="fc" type="text" id="gT" placeholder="例：読書を月10冊達成"></div>
+    <div class="fg"><label class="fl">カラー</label><div class="color-row" id="colorRow"></div></div>
+    <div class="fg"><label class="fl">期限</label><input class="fc" type="text" id="gD" placeholder="例：〜9月"></div>
+    <div class="fg"><label class="fl">現在の進捗 (%)</label><input class="fc" type="number" id="gP" placeholder="0" min="0" max="100"></div>
+    <div class="mbtns">
+      <button class="btn-ng" onclick="closeGoalModal()">キャンセル</button>
+      <button class="btn-ok" onclick="addGoal()">追加する ◆</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const COLORS = [
+  {dot:'#b09ad8',fill:'linear-gradient(90deg,#c5aee8,#b09ad8)',bg:'rgba(197,174,232,.15)',border:'rgba(197,174,232,.38)',text:'#7a5fa8'},
+  {dot:'#c8a8c8',fill:'linear-gradient(90deg,#c8a8c8,#b098b0)',bg:'rgba(200,168,200,.15)',border:'rgba(200,168,200,.38)',text:'#886888'},
+  {dot:'#9bb4e8',fill:'linear-gradient(90deg,#9bb4e8,#7898d0)',bg:'rgba(155,180,232,.15)',border:'rgba(155,180,232,.38)',text:'#506898'},
+  {dot:'#b4d2be',fill:'linear-gradient(90deg,#b4d2be,#8db8a0)',bg:'rgba(180,210,190,.15)',border:'rgba(180,210,190,.38)',text:'#4a8060'},
+  {dot:'#e8c89b',fill:'linear-gradient(90deg,#e8c89b,#d0a870)',bg:'rgba(232,200,155,.15)',border:'rgba(232,200,155,.38)',text:'#906830'},
+];
+
+// ── STATE ──
+let goals = [
+  {id:'g1',name:'📖 英語力向上 TOEIC 900点',pct:62,deadline:'〜12月',ci:0},
+  {id:'g2',name:'💜 副業で月5万円達成',      pct:30,deadline:'〜6月', ci:1},
+  {id:'g3',name:'✦ 体重 -5kg 達成',          pct:80,deadline:'〜4月', ci:2},
+];
+let tasks = [
+  {id:'t1',text:'TOEICの模試を解く',    gid:'g1',quad:'q1',done:false},
+  {id:'t2',text:'クライアントへの返信',  gid:'g2',quad:'q1',done:false},
+  {id:'t3',text:'単語帳アプリで200語',   gid:'g1',quad:'q2',done:false},
+  {id:'t4',text:'週次レポート作成',      gid:'g2',quad:'q2',done:false},
+  {id:'t5',text:'ジムのプログラム見直し',gid:'g3',quad:'q3',done:false},
+  {id:'t6',text:'古い資料の整理',        gid:'',  quad:'q4',done:false},
+];
+let activeFilter = null;
+let selColor = 0;
+let gCnt = 10, tCnt = 20;
+
+// ── DATE ──
+document.getElementById('dateDisp').textContent =
+  new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+// ── CANVAS ──
+(function(){
+  const canvas=document.getElementById('decoCanvas'),ctx=canvas.getContext('2d');
+  const resize=()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;};
+  resize(); window.addEventListener('resize',resize);
+  const C=['rgba(197,174,232,','rgba(200,168,200,','rgba(176,154,216,','rgba(216,205,240,'];
+  const shapes=[];
+  for(let i=0;i<22;i++) shapes.push({type:'d',x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,sz:4+Math.random()*9,vx:(Math.random()-.5)*.25,vy:-.12-Math.random()*.18,rot:Math.random()*Math.PI,vr:(Math.random()-.5)*.008,a:.12+Math.random()*.28,c:C[~~(Math.random()*4)]});
+  for(let i=0;i<10;i++) shapes.push({type:'b',x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,sz:8+Math.random()*10,vx:(Math.random()-.5)*.2,vy:-.1-Math.random()*.15,rot:Math.random()*Math.PI,vr:(Math.random()-.5)*.006,a:.09+Math.random()*.2,c:C[~~(Math.random()*4)]});
+  const dd=(x,y,sz,rot,a,c)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.beginPath();ctx.moveTo(0,-sz);ctx.lineTo(sz*.6,0);ctx.lineTo(0,sz);ctx.lineTo(-sz*.6,0);ctx.closePath();ctx.fillStyle=c+a+')';ctx.fill();ctx.strokeStyle=c+(a*1.4)+')';ctx.lineWidth=.8;ctx.stroke();ctx.restore();};
+  const db=(x,y,sz,rot,a,c)=>{ctx.save();ctx.translate(x,y);ctx.rotate(rot);const f=c+a+')',s=c+(a*1.6)+')';ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(-sz,-sz*.8,-sz*1.4,-sz*.2,-sz,sz*.5);ctx.bezierCurveTo(-sz*.5,sz*.2,-.1*sz,.1*sz,0,0);ctx.fillStyle=f;ctx.fill();ctx.strokeStyle=s;ctx.lineWidth=.7;ctx.stroke();ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(sz,-sz*.8,sz*1.4,-sz*.2,sz,sz*.5);ctx.bezierCurveTo(sz*.5,sz*.2,.1*sz,.1*sz,0,0);ctx.fillStyle=f;ctx.fill();ctx.strokeStyle=s;ctx.lineWidth=.7;ctx.stroke();ctx.beginPath();ctx.arc(0,0,sz*.22,0,Math.PI*2);ctx.fillStyle=s;ctx.fill();ctx.restore();};
+  const tick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);const W=canvas.width,H=canvas.height;shapes.forEach(s=>{s.x+=s.vx;s.y+=s.vy;s.rot+=s.vr;if(s.y<-40)s.y=H+40;if(s.x<-40)s.x=W+40;if(s.x>W+40)s.x=-40;s.type==='d'?dd(s.x,s.y,s.sz,s.rot,s.a,s.c):db(s.x,s.y,s.sz,s.rot,s.a,s.c);});requestAnimationFrame(tick);};
+  tick();
+})();
+
+// ── HELPERS ──
+const stripEmoji = s => s.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s◆◇✦]+/gu,'').trim();
+
+// ── RENDER GOALS ──
+function renderGoals(){
+  const list=document.getElementById('goalList');
+  list.innerHTML='';
+  goals.forEach(g=>{
+    const c=COLORS[g.ci]||COLORS[0];
+    const tc=tasks.filter(t=>t.gid===g.id).length;
+    const dc=tasks.filter(t=>t.gid===g.id&&t.done).length;
+    const isAct=activeFilter===g.id;
+    const div=document.createElement('div');
+    div.className='goal-item'+(isAct?' active-filter':'');
+    div.onclick=e=>{if(e.target.classList.contains('goal-del'))return;toggleFilter(g.id);};
+    div.innerHTML=`
+      <div class="goal-header">
+        <div class="goal-color-dot" style="background:${c.dot}"></div>
+        <div class="goal-name-text">${g.name}</div>
+        <div class="goal-task-badge">${dc}/${tc}</div>
+      </div>
+      <div class="goal-bar"><div class="goal-fill" style="width:${g.pct}%;background:${c.fill}"></div></div>
+      <div class="goal-meta"><span class="goal-pct" style="color:${c.dot}">${g.pct}%</span><span>${g.deadline}</span></div>
+      <button class="goal-del" onclick="deleteGoal('${g.id}')">✕</button>`;
+    list.appendChild(div);
+  });
+
+  // Filter clear btn
+  document.getElementById('filterClearBtn').classList.toggle('show', activeFilter!==null);
+
+  // Rebuild goal selector
+  const sel=document.getElementById('tGoal');
+  const prev=sel.value;
+  sel.innerHTML='<option value="">目標なし</option>';
+  goals.forEach(g=>{
+    const o=document.createElement('option');
+    o.value=g.id; o.textContent=stripEmoji(g.name);
+    sel.appendChild(o);
+  });
+  if(prev) sel.value=prev;
+}
+
+// ── RENDER TASKS ──
+function renderTasks(){
+  ['q1','q2','q3','q4'].forEach(qid=>{
+    const el=document.getElementById(qid);
+    el.innerHTML='';
+    const qt=tasks.filter(t=>t.quad===qid);
+    if(qt.length===0){
+      const e=document.createElement('div');e.className='no-task';e.textContent='タスクなし';el.appendChild(e);return;
+    }
+    qt.forEach(t=>{
+      const show=activeFilter===null||t.gid===activeFilter;
+      const g=goals.find(g=>g.id===t.gid);
+      const c=g?COLORS[g.ci]||COLORS[0]:null;
+      const div=document.createElement('div');
+      div.className='task'+(t.done?' done':'')+(!show?' hidden':'');
+      div.dataset.tid=t.id;
+      div.onclick=e=>{if(e.target.classList.contains('task-del'))return;t.done=!t.done;renderTasks();renderGoals();renderAlerts();};
+      const tag=g&&c?`<span class="task-gtag" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}"><span class="tgdot" style="background:${c.dot}"></span>${stripEmoji(g.name)}</span>`:'';
+      div.innerHTML=`<div class="tcb"></div><div style="flex:1"><div class="ttxt">${t.text}</div>${tag}</div><button class="task-del" onclick="deleteTask('${t.id}')">✕</button>`;
+      el.appendChild(div);
+    });
+  });
+  updateStats();
+}
+
+// ── FILTER ──
+function toggleFilter(gid){
+  activeFilter=activeFilter===gid?null:gid;
+  const g=goals.find(g=>g.id===activeFilter);
+  const badge=document.getElementById('filterBadge');
+  if(g){
+    const c=COLORS[g.ci]||COLORS[0];
+    document.getElementById('fbDot').style.background=c.dot;
+    document.getElementById('fbText').textContent=stripEmoji(g.name);
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+  renderGoals();
+  renderTasks();
+}
+function clearFilter(){activeFilter=null;toggleFilter(null);}
+
+// ── DELETE TASK ──
+function deleteTask(tid){
+  const el=document.querySelector(`[data-tid="${tid}"]`);
+  if(el){el.style.transition='opacity .22s,transform .22s';el.style.opacity='0';el.style.transform='translateX(8px)';setTimeout(()=>{tasks=tasks.filter(t=>t.id!==tid);renderTasks();renderGoals();renderAlerts();},220);}
+  else{tasks=tasks.filter(t=>t.id!==tid);renderTasks();renderGoals();renderAlerts();}
+}
+
+// ── STATS ──
+function updateStats(){
+  const done=tasks.filter(t=>t.done).length;
+  const left=tasks.filter(t=>!t.done).length;
+  const rate=tasks.length?Math.round(done/tasks.length*100):0;
+  document.getElementById('sDone').textContent=done;
+  document.getElementById('sLeft').textContent=left;
+  document.getElementById('sRate').textContent=rate+'%';
+}
+
+// ── ALERTS ──
+function renderAlerts(){
+  const area=document.getElementById('alertArea');
+  area.innerHTML='';
+  if(!document.getElementById('alertToggle').classList.contains('on')) return;
+  goals.forEach(g=>{
+    const c=COLORS[g.ci]||COLORS[0];
+    const remaining=tasks.filter(t=>t.gid===g.id&&!t.done).length;
+    let msg=null;
+    if(g.pct<35) msg=`進捗が ${g.pct}% とペースが遅めです。タスクを追加して優先度を上げてみましょう！`;
+    else if(remaining===0&&g.pct<100) msg=`紐づいているタスクがゼロです。次のアクションを設定しましょう ◆`;
+    if(!msg) return;
+    const al=document.createElement('div');
+    al.className='luna-alert';
+    al.innerHTML=`<div class="alert-icon">🎀</div><div class="alert-body"><div class="alert-title" style="color:${c.text}">${stripEmoji(g.name)} の進捗アラート</div><div class="alert-text">Lunaより：${msg}</div></div><button class="alert-close" onclick="this.parentElement.remove()">✕</button>`;
+    al.onclick=e=>{
+      if(e.target.classList.contains('alert-close'))return;
+      const userMsg=`「${g.name}」の進捗 ${g.pct}%・残タスク ${remaining} 件について詳しくアドバイスがほしい`;
+      addMsg(userMsg,'user');
+      callLuna(`目標「${g.name}」は進捗${g.pct}%で残タスクが${remaining}件です。具体的なアドバイスと励ましをください。`);
+    };
+    area.appendChild(al);
+  });
+}
+
+// ── ADD TASK ──
+function addTask(){
+  const txt=document.getElementById('tIn').value.trim();if(!txt)return;
+  const gid=document.getElementById('tGoal').value;
+  const quad=document.getElementById('tQuad').value;
+  tasks.push({id:'t'+(++tCnt),text:txt,gid,quad,done:false});
+  document.getElementById('tIn').value='';
+  renderTasks();renderGoals();renderAlerts();
+}
+
+// ── GOAL MODAL ──
+function openGoalModal(){
+  const row=document.getElementById('colorRow');row.innerHTML='';
+  COLORS.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='col-opt'+(i===selColor?' sel':'');
+    d.style.background=c.dot;
+    d.onclick=()=>{selColor=i;document.querySelectorAll('.col-opt').forEach((e,j)=>e.classList.toggle('sel',j===i));};
+    row.appendChild(d);
+  });
+  document.getElementById('goalOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('gT').focus(),80);
+}
+function closeGoalModal(){document.getElementById('goalOverlay').classList.remove('open');}
+document.getElementById('goalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeGoalModal();});
+
+function addGoal(){
+  const name=document.getElementById('gT').value.trim();if(!name)return;
+  const deadline=document.getElementById('gD').value.trim()||'期限未定';
+  const pct=Math.min(100,Math.max(0,parseInt(document.getElementById('gP').value)||0));
+  goals.push({id:'g'+(++gCnt),name,pct,deadline,ci:selColor});
+  closeGoalModal();
+  ['gT','gD','gP'].forEach(id=>document.getElementById(id).value='');
+  renderGoals();renderTasks();renderAlerts();
+}
+
+function deleteGoal(gid){
+  goals=goals.filter(g=>g.id!==gid);
+  tasks.forEach(t=>{if(t.gid===gid)t.gid='';});
+  if(activeFilter===gid){activeFilter=null;document.getElementById('filterBadge').classList.remove('show');}
+  renderGoals();renderTasks();renderAlerts();
+}
+
+// ── AI CHAT ──
+const SYS=`あなたは「Luna」という名前の個人AIセクレタリーです。明るくてポジティブ、頭が切れてプロフェッショナル。絵文字（✨💜◆🎀）を適度に使って親しみやすく話す。返答は日本語で2〜4文程度にコンパクトに。`;
+let hist=[];
+async function callLuna(msg){
+  const tp=document.getElementById('typing');tp.classList.add('show');scrollC();
+  hist.push({role:'user',content:msg});
+  try{
+    const response = await fetch('/api/luna',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system:SYS,messages:hist})
+    });
+    if(!response.ok) throw new Error('API request failed');
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || '少し考え中です…もう一度話しかけてみてください ✨';
+    hist.push({role:'assistant',content:reply});
+    tp.classList.remove('show');addMsg(reply,'luna');
+  }catch(e){tp.classList.remove('show');addMsg('少し考え中です…もう一度話しかけてみてください ✨','luna');}
+}
+function addMsg(text,who){
+  const area=document.getElementById('chatMsgs'),d=document.createElement('div');
+  d.className=`msg msg-${who}`;
+  const t=new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=`${text}<div class="msg-time">${t}</div>`;
+  area.appendChild(d);scrollC();
+}
+function scrollC(){document.getElementById('chatMsgs').scrollTop=9999;}
+function sendMsg(){const el=document.getElementById('cin'),t=el.value.trim();if(!t)return;addMsg(t,'user');el.value='';el.style.height='auto';callLuna(t);}
+function qsend(m){addMsg(m,'user');callLuna(m);}
+function aiSort(){
+  const summary=goals.map(g=>`${g.name}（進捗${g.pct}%・残${tasks.filter(t=>t.gid===g.id&&!t.done).length}件）`).join('、');
+  addMsg('タスクの整理をお願い！','user');
+  callLuna(`現在の目標：${summary}。今日の優先順位とアドバイスをまとめて。`);
+}
+
+// ── INIT ──
+renderGoals();renderTasks();renderAlerts();
+</script>
+</body>
+</html>
