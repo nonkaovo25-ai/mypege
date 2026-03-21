@@ -976,8 +976,10 @@ async function callLuna(msg){
     clearTimeout(timer);
     const data = await response.json();
     if(!response.ok){
-      const errMsg = data?.error||data?.message||`HTTP ${response.status}`;
-      console.error('[Luna] API error:',errMsg,data);
+      const errObj = data?.error;
+      const errMsg = typeof errObj==='string' ? errObj
+        : errObj?.message || data?.message || `HTTP ${response.status}`;
+      console.error('[Luna] API error:',JSON.stringify(data));
       tp.classList.remove('show');
       addMsg(`⚠️ エラー: ${errMsg}`,'luna');
       hist.pop();return;
