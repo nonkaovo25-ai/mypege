@@ -506,6 +506,10 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
   <div class="card" style="animation-delay:.25s">
     <div class="card-label">プロダクト進捗ボード</div>
     <div class="product-tabs" id="productTabs"></div>
+    <div id="productAddRow" style="display:none;gap:7px;margin-bottom:12px;flex-wrap:wrap;">
+      <input class="task-in" type="text" id="productNameIn" placeholder="プロダクト名 (例: 📱 新アプリ)" style="flex:1" onkeydown="if(event.key==='Enter')addProduct()">
+      <button class="task-add-btn" onclick="addProduct()">追加 ◆</button>
+    </div>
     <div class="product-kanban">
       <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:#c0a0d8;display:inline-block"></span>アイデア</div><div id="kcol-idea"></div></div>
       <div class="kanban-col"><div class="kanban-col-title"><span style="width:6px;height:6px;border-radius:1px;transform:rotate(45deg);background:var(--lav2);display:inline-block"></span>開発中</div><div id="kcol-dev"></div></div>
@@ -1063,15 +1067,36 @@ function renderRevenue(){
 
 // ══════════════════════════════════════════
 // ── ④ プロダクト進捗ボード ──
-const PRODUCTS=[
+const DEFAULT_PRODUCTS=[
   {id:'p1',name:'👶 ままのとなり'},
   {id:'p2',name:'👻 ghost sales'},
   {id:'p3',name:'💪 AIトレーナー'},
   {id:'p4',name:'📅 予約管理'},
 ];
-let activeProduct='p1';
+let products=JSON.parse(localStorage.getItem('norikaProducts')||'null')||DEFAULT_PRODUCTS;
+let pCnt=Math.max(10,...products.map(p=>parseInt(p.id.replace('p',''))||0));
+let activeProduct=products[0]?.id||'p1';
+function saveProducts(){localStorage.setItem('norikaProducts',JSON.stringify(products));}
 function loadKanban(){return JSON.parse(localStorage.getItem('norikaKanban')||'{}');}
 function setActiveProduct(pid){activeProduct=pid;renderKanban();}
+function addProduct(){
+  const name=document.getElementById('productNameIn').value.trim();
+  if(!name)return;
+  const id='p'+(++pCnt);
+  products.push({id,name});
+  saveProducts();
+  activeProduct=id;
+  document.getElementById('productNameIn').value='';
+  document.getElementById('productAddRow').style.display='none';
+  renderKanban();
+}
+function deleteProduct(pid){
+  if(products.length<=1){alert('最低1つのプロダクトが必要だよ');return;}
+  products=products.filter(p=>p.id!==pid);
+  saveProducts();
+  if(activeProduct===pid)activeProduct=products[0].id;
+  renderKanban();
+}
 function addKanbanTask(){
   const txt=document.getElementById('kanbanIn').value.trim();
   const col=document.getElementById('kanbanCol').value;
@@ -1087,10 +1112,23 @@ function addKanbanTask(){
 function renderKanban(){
   const d=loadKanban();
   const tabs=document.getElementById('productTabs');tabs.innerHTML='';
-  PRODUCTS.forEach(p=>{
+  products.forEach(p=>{
+    const wrap=document.createElement('div');wrap.style.cssText='display:inline-flex;align-items:center;gap:3px;';
     const btn=document.createElement('button');btn.className='ptab'+(p.id===activeProduct?' active':'');
-    btn.textContent=p.name;btn.onclick=()=>setActiveProduct(p.id);tabs.appendChild(btn);
+    btn.textContent=p.name;btn.onclick=()=>setActiveProduct(p.id);
+    const del=document.createElement('button');
+    del.style.cssText='font-size:.6rem;background:transparent;border:none;cursor:pointer;color:var(--text3);padding:0 2px;line-height:1;font-family:inherit;';
+    del.textContent='✕';del.onclick=(e)=>{e.stopPropagation();if(confirm(`「${p.name}」を削除する？`))deleteProduct(p.id);};
+    wrap.appendChild(btn);wrap.appendChild(del);tabs.appendChild(wrap);
   });
+  // 追加ボタン
+  const addBtn=document.createElement('button');addBtn.className='ptab';addBtn.textContent='＋ 追加';
+  addBtn.onclick=()=>{
+    const row=document.getElementById('productAddRow');
+    row.style.display=row.style.display==='none'?'flex':'none';
+    if(row.style.display==='flex')document.getElementById('productNameIn').focus();
+  };
+  tabs.appendChild(addBtn);
   const pd=d[activeProduct]||{};
   ['idea','dev','test','done'].forEach(col=>{
     const el=document.getElementById('kcol-'+col);el.innerHTML='';
