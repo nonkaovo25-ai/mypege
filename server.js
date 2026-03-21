@@ -23,6 +23,10 @@ function basicAuth(req, res, next) {
 }
 
 app.use(express.json({ limit: "1mb" }));
+
+// ヘルスチェック（Basic認証不要）
+app.get("/ping", (req, res) => res.send("ok"));
+
 app.use(basicAuth);
 app.use(express.static(path.join(__dirname)));
 
