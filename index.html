@@ -445,8 +445,11 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
       <div class="setting-row"><span>進捗アラート</span><div class="toggle on" id="alertToggle" onclick="this.classList.toggle('on');renderAlerts()"></div></div>
       <div class="setting-row"><span>週次レポート</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row" style="margin-top:4px;">
-        <span id="authUserEmail" style="font-size:.68rem;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未ログイン</span>
-        <button onclick="logout()" style="font-size:.68rem;font-family:inherit;color:var(--text3);background:transparent;border:1px solid var(--lav3);padding:4px 12px;border-radius:20px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--lav2)';this.style.color='var(--purple)'" onmouseout="this.style.borderColor='var(--lav3)';this.style.color='var(--text3)'">ログアウト</button>
+        <span id="authUserEmail" style="font-size:.68rem;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未ログイン</span>
+        <div style="display:flex;gap:6px;">
+          <button onclick="forceSyncAll()" id="syncBtn" style="font-size:.68rem;font-family:inherit;color:var(--purple2);background:transparent;border:1px solid var(--lav2);padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;">↑同期</button>
+          <button onclick="logout()" style="font-size:.68rem;font-family:inherit;color:var(--text3);background:transparent;border:1px solid var(--lav3);padding:4px 10px;border-radius:20px;cursor:pointer;transition:all .2s;">ログアウト</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1425,6 +1428,36 @@ async function loadAllFromSupabase(){
     pCnt = Math.max(10,...products.map(p=>parseInt(p.id.replace('p',''))||0));
     if(!products.find(p=>p.id===activeProduct)) activeProduct=products[0]?.id||'p1';
   } catch(e){ console.warn('loadAllFromSupabase error:',e); }
+}
+
+async function forceSyncAll(){
+  if(!sbClient||!currentUser){ alert('ログインしてから使ってね'); return; }
+  const btn=document.getElementById('syncBtn');
+  btn.textContent='送信中…'; btn.disabled=true;
+  const habits=loadHabits(), weights=loadWeights(), revenue=loadRevenue(),
+        kanban=loadKanban(), insta=loadInsta(), moods=loadMoods(), secret=loadSecretEntries();
+  const rows=[
+    {user_id:currentUser.id,key:'goals',value:goals,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'tasks',value:tasks,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'products',value:products,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'habits',value:habits,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'weights',value:weights,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'revenue',value:revenue,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'kanban',value:kanban,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'insta',value:insta,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'moods',value:moods,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'secret',value:secret,updated_at:new Date().toISOString()},
+  ];
+  try{
+    const {error}=await sbClient.from('mypage_data').upsert(rows,{onConflict:'user_id,key'});
+    if(error) throw error;
+    btn.textContent='✓ 完了！';
+    setTimeout(()=>{btn.textContent='↑同期';btn.disabled=false;},2000);
+  } catch(e){
+    console.error('forceSyncAll error:',e);
+    btn.textContent='失敗…';
+    setTimeout(()=>{btn.textContent='↑同期';btn.disabled=false;},2000);
+  }
 }
 
 function queueSync(key,value){
