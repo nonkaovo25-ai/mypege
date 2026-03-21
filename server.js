@@ -8,8 +8,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const API_KEY = process.env.OPENAI_API_KEY || "";
+const LOGIN_USER = process.env.LOGIN_USER || "";
+const LOGIN_PASS = process.env.LOGIN_PASS || "";
+
+// Basic認証ミドルウェア
+function basicAuth(req, res, next) {
+  if (!LOGIN_USER || !LOGIN_PASS) return next();
+  const authHeader = req.headers["authorization"] || "";
+  const base64 = authHeader.replace(/^Basic\s+/i, "");
+  const [user, pass] = Buffer.from(base64, "base64").toString().split(":");
+  if (user === LOGIN_USER && pass === LOGIN_PASS) return next();
+  res.set("WWW-Authenticate", 'Basic realm="My Page"');
+  return res.status(401).send("認証が必要です");
+}
 
 app.use(express.json({ limit: "1mb" }));
+app.use(basicAuth);
 app.use(express.static(path.join(__dirname)));
 
 app.post("/api/luna", async (req, res) => {
