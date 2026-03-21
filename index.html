@@ -1331,6 +1331,8 @@ async function initSupabase(){
       hideAuthOverlay();
       await loadAllFromSupabase();
       renderAll();
+    } else {
+      showAuthOverlay();
     }
     sbClient.auth.onAuthStateChange(async(event, session)=>{
       if(event==='SIGNED_IN' && session?.user){
