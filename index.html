@@ -619,12 +619,12 @@ const COLORS = [
 ];
 
 // ── STATE ──
-let goals = [
+const DEFAULT_GOALS = [
   {id:'g1',name:'📖 英語力向上 TOEIC 900点',pct:62,deadline:'〜12月',ci:0},
   {id:'g2',name:'💜 副業で月5万円達成',      pct:30,deadline:'〜6月', ci:1},
   {id:'g3',name:'✦ 体重 -5kg 達成',          pct:80,deadline:'〜4月', ci:2},
 ];
-let tasks = [
+const DEFAULT_TASKS = [
   {id:'t1',text:'TOEICの模試を解く',    gid:'g1',quad:'q1',done:false},
   {id:'t2',text:'クライアントへの返信',  gid:'g2',quad:'q1',done:false},
   {id:'t3',text:'単語帳アプリで200語',   gid:'g1',quad:'q2',done:false},
@@ -632,9 +632,17 @@ let tasks = [
   {id:'t5',text:'ジムのプログラム見直し',gid:'g3',quad:'q3',done:false},
   {id:'t6',text:'古い資料の整理',        gid:'',  quad:'q4',done:false},
 ];
+let goals = JSON.parse(localStorage.getItem('norikaGoals') || 'null') || DEFAULT_GOALS;
+let tasks = JSON.parse(localStorage.getItem('norikaTasks') || 'null') || DEFAULT_TASKS;
 let activeFilter = null;
 let selColor = 0;
-let gCnt = 10, tCnt = 20;
+let gCnt = Math.max(10, ...goals.map(g=>parseInt(g.id.replace('g',''))||0));
+let tCnt = Math.max(20, ...tasks.map(t=>parseInt(t.id.replace('t',''))||0));
+
+function saveData(){
+  localStorage.setItem('norikaGoals', JSON.stringify(goals));
+  localStorage.setItem('norikaTasks', JSON.stringify(tasks));
+}
 
 // ── DATE ──
 document.getElementById('dateDisp').textContent =
@@ -713,7 +721,7 @@ function renderTasks(){
       const div=document.createElement('div');
       div.className='task'+(t.done?' done':'')+(!show?' hidden':'');
       div.dataset.tid=t.id;
-      div.onclick=e=>{if(e.target.classList.contains('task-del'))return;t.done=!t.done;renderTasks();renderGoals();renderAlerts();};
+      div.onclick=e=>{if(e.target.classList.contains('task-del'))return;t.done=!t.done;saveData();renderTasks();renderGoals();renderAlerts();};
       const tag=g&&c?`<span class="task-gtag" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}"><span class="tgdot" style="background:${c.dot}"></span>${stripEmoji(g.name)}</span>`:'';
       div.innerHTML=`<div class="tcb"></div><div style="flex:1"><div class="ttxt">${t.text}</div>${tag}</div><button class="task-del" onclick="deleteTask('${t.id}')">✕</button>`;
       el.appendChild(div);
@@ -743,8 +751,8 @@ function clearFilter(){activeFilter=null;toggleFilter(null);}
 // ── DELETE TASK ──
 function deleteTask(tid){
   const el=document.querySelector(`[data-tid="${tid}"]`);
-  if(el){el.style.transition='opacity .22s,transform .22s';el.style.opacity='0';el.style.transform='translateX(8px)';setTimeout(()=>{tasks=tasks.filter(t=>t.id!==tid);renderTasks();renderGoals();renderAlerts();},220);}
-  else{tasks=tasks.filter(t=>t.id!==tid);renderTasks();renderGoals();renderAlerts();}
+  if(el){el.style.transition='opacity .22s,transform .22s';el.style.opacity='0';el.style.transform='translateX(8px)';setTimeout(()=>{tasks=tasks.filter(t=>t.id!==tid);saveData();renderTasks();renderGoals();renderAlerts();},220);}
+  else{tasks=tasks.filter(t=>t.id!==tid);saveData();renderTasks();renderGoals();renderAlerts();}
 }
 
 // ── STATS ──
@@ -789,7 +797,7 @@ function addTask(){
   const quad=document.getElementById('tQuad').value;
   tasks.push({id:'t'+(++tCnt),text:txt,gid,quad,done:false});
   document.getElementById('tIn').value='';
-  renderTasks();renderGoals();renderAlerts();
+  saveData();renderTasks();renderGoals();renderAlerts();
 }
 
 // ── GOAL MODAL ──
@@ -815,14 +823,14 @@ function addGoal(){
   goals.push({id:'g'+(++gCnt),name,pct,deadline,ci:selColor});
   closeGoalModal();
   ['gT','gD','gP'].forEach(id=>document.getElementById(id).value='');
-  renderGoals();renderTasks();renderAlerts();
+  saveData();renderGoals();renderTasks();renderAlerts();
 }
 
 function deleteGoal(gid){
   goals=goals.filter(g=>g.id!==gid);
   tasks.forEach(t=>{if(t.gid===gid)t.gid='';});
   if(activeFilter===gid){activeFilter=null;document.getElementById('filterBadge').classList.remove('show');}
-  renderGoals();renderTasks();renderAlerts();
+  saveData();renderGoals();renderTasks();renderAlerts();
 }
 
 // ── AI CHAT ──
