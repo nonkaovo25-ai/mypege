@@ -206,9 +206,11 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 .btn-ng{flex:1;padding:10px;background:transparent;border:1.5px solid var(--lav3);border-radius:12px;font-family:inherit;font-size:.81rem;color:var(--text3);cursor:pointer;transition:all .2s;}
 .btn-ng:hover{border-color:var(--lav2);color:var(--purple);}
 
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(197,174,232,.4);border-radius:4px;}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:rgba(230,220,245,.3);border-radius:8px;}
+::-webkit-scrollbar-thumb{background:rgba(171,139,209,.55);border-radius:8px;border:2px solid transparent;background-clip:padding-box;}
+::-webkit-scrollbar-thumb:hover{background:rgba(148,103,195,.75);border-radius:8px;border:2px solid transparent;background-clip:padding-box;}
+html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245,.3);}
 
 /* ── FEATURES SECTION ── */
 .features-section{display:flex;flex-direction:column;gap:20px;margin-top:20px;}
