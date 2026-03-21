@@ -965,17 +965,33 @@ async function callLuna(msg){
   const tp=document.getElementById('typing');tp.classList.add('show');scrollC();
   hist.push({role:'user',content:msg});
   try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),25000);
     const response = await fetch('/api/luna',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system:SYS,messages:hist})
+      body:JSON.stringify({system:SYS,messages:hist}),
+      signal:controller.signal
     });
-    if(!response.ok) throw new Error('API request failed');
+    clearTimeout(timer);
     const data = await response.json();
+    if(!response.ok){
+      const errMsg = data?.error||data?.message||`HTTP ${response.status}`;
+      console.error('[Luna] API error:',errMsg,data);
+      tp.classList.remove('show');
+      addMsg(`⚠️ エラー: ${errMsg}`,'luna');
+      hist.pop();return;
+    }
     const reply = data.content?.[0]?.text || '少し考え中です…もう一度話しかけてみてください ✨';
     hist.push({role:'assistant',content:reply});
     tp.classList.remove('show');addMsg(reply,'luna');
-  }catch(e){tp.classList.remove('show');addMsg('少し考え中です…もう一度話しかけてみてください ✨','luna');}
+  }catch(e){
+    console.error('[Luna] Fetch error:',e);
+    tp.classList.remove('show');
+    const msg2 = e.name==='AbortError' ? '⏱️ タイムアウト（25秒）しました。もう一度試してね' : `⚠️ 接続エラー: ${e.message}`;
+    addMsg(msg2,'luna');
+    hist.pop();
+  }
 }
 function addMsg(text,who){
   const area=document.getElementById('chatMsgs'),d=document.createElement('div');
