@@ -1786,7 +1786,9 @@ const LUNA_POSITIONS=[
 const LUNA_IMGS={
   idle:'/luna-idle.png',
   walk:'/luna-walk.png',
-  work:'/luna-states.png',
+  happy:'/luna-happy.png',
+  worried:'/luna-worried.png',
+  point:'/luna-point.png',
 };
 let _lunaIdx=0, _lunaMoving=false, _lunaBubbleTimer=null;
 
@@ -1815,6 +1817,10 @@ function lunaSay(msg){
   _lunaBubbleTimer=setTimeout(()=>{b.style.display='none';},5500);
 }
 
+function lunaSetImg(key){
+  const img=document.getElementById('lunaImg');
+  if(img) img.src=LUNA_IMGS[key]||LUNA_IMGS.idle;
+}
 function lunaMove(){
   if(_lunaMoving)return;
   _lunaMoving=true;
@@ -1831,7 +1837,9 @@ function lunaMove(){
   setTimeout(()=>{
     img.classList.remove('luna-hop');
     img.classList.add('luna-idle');
-    img.src=LUNA_IMGS.idle;
+    // ランダムで止まったときのポーズ
+    const idlePoses=['idle','idle','idle','point'];
+    img.src=LUNA_IMGS[idlePoses[Math.floor(Math.random()*idlePoses.length)]];
     _lunaMoving=false;
   },2900);
 }
@@ -1839,8 +1847,9 @@ function lunaMove(){
 function lunaClick(){
   const chat=document.querySelector('.chat-card');
   if(chat)chat.scrollIntoView({behavior:'smooth',block:'center'});
+  lunaSetImg('happy');
   lunaSay('なに？話しかけてくれたの？嬉しい💜\nチャットで話せるよ！');
-  lunaMove();
+  setTimeout(()=>lunaSetImg('idle'),4000);
 }
 
 function lunaInit(){
