@@ -402,6 +402,17 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
 .bgm-collapsed .bgm-tracks,.bgm-collapsed .bgm-controls,.bgm-collapsed .bgm-now{display:none;}
 .bgm-collapsed{width:auto;padding:8px 14px;}
 @media(max-width:700px){.bgm-player{display:none;}}
+/* ── Lunaキャラクター ── */
+#lunaChar{position:fixed;bottom:80px;right:24px;width:110px;cursor:pointer;z-index:150;transition:right 2.8s cubic-bezier(.4,0,.2,1),bottom 2.8s cubic-bezier(.4,0,.2,1);filter:drop-shadow(0 4px 16px rgba(150,120,200,.3));user-select:none;}
+#lunaChar:hover #lunaImg{transform:scale(1.08);}
+#lunaImg{width:110px;height:110px;object-fit:contain;transition:transform .3s;}
+#lunaImg.luna-hop{animation:lunaHop .45s ease infinite;}
+@keyframes lunaHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+#lunaImg.luna-idle{animation:lunaFloat 3s ease-in-out infinite;}
+@keyframes lunaFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.luna-bubble{position:absolute;bottom:115px;right:0;background:var(--white);border:1px solid var(--lav3);border-radius:16px 16px 0 16px;padding:9px 13px;font-size:.68rem;color:var(--text);max-width:190px;box-shadow:0 4px 18px var(--shadow);line-height:1.6;white-space:pre-wrap;animation:bubblePop .25s ease;z-index:151;}
+@keyframes bubblePop{from{opacity:0;transform:scale(.8) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(max-width:1100px){#lunaChar{display:none;}}
 </style>
 </head>
 <body>
@@ -428,6 +439,12 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
       <span style="font-size:.62rem;color:var(--text3);">🎀 のりかの専用ダッシュボード</span>
     </div>
   </div>
+</div>
+
+<!-- LUNA CHARACTER -->
+<div id="lunaChar" onclick="lunaClick()" title="Lunaに話しかける">
+  <div class="luna-bubble" id="lunaBubble" style="display:none"></div>
+  <img id="lunaImg" src="/luna-idle.png" alt="Luna" class="luna-idle">
 </div>
 
 <!-- BGM PLAYER -->
@@ -1757,10 +1774,86 @@ function queueSync(key,value){
   },800);
 }
 
+// ══════════════════════════════════════════
+// ── Lunaキャラクター ──
+const LUNA_POSITIONS=[
+  {right:24, bottom:80},
+  {right:24, bottom:280},
+  {right:24, bottom:480},
+  {right:90, bottom:150},
+  {right:24, bottom:160},
+];
+const LUNA_IMGS={
+  idle:'/luna-idle.png',
+  walk:'/luna-walk.png',
+  work:'/luna-states.png',
+};
+let _lunaIdx=0, _lunaMoving=false, _lunaBubbleTimer=null;
+
+function lunaMsgs(){
+  const h=new Date().getHours();
+  const rem=tasks.filter(t=>!t.done).length;
+  const pool=[
+    h<12 ? 'おはよ！☀️ 今日も一緒に頑張ろうね！' : h<18 ? 'お昼はちゃんと食べた？💜' : h<22 ? '今日もお疲れさま✨' : 'もう遅いよ〜🌙 ちゃんと寝てね！',
+    rem>0 ? `タスクが${rem}個残ってるよ！\n一緒に片付けよ💜` : 'タスク全部終わった！🎉 すごい！',
+    '体重グラフに記録した？\nコツコツ続けてね🌸',
+    'Instagramのアイデア、\nメモしといてね📸',
+    '今日の気分はどう？\n気分ログに記録してみて😊',
+    '目標の進捗、更新してみよ！✦',
+    'ここクリックしたら\nLunaに話しかけられるよ💜',
+    '売上入力した？\nコツコツ記録が大事だよ！',
+  ];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function lunaSay(msg){
+  const b=document.getElementById('lunaBubble');
+  if(!b)return;
+  b.textContent=msg;
+  b.style.display='block';
+  clearTimeout(_lunaBubbleTimer);
+  _lunaBubbleTimer=setTimeout(()=>{b.style.display='none';},5500);
+}
+
+function lunaMove(){
+  if(_lunaMoving)return;
+  _lunaMoving=true;
+  const el=document.getElementById('lunaChar');
+  const img=document.getElementById('lunaImg');
+  if(!el||!img)return;
+  _lunaIdx=(_lunaIdx+1)%LUNA_POSITIONS.length;
+  const pos=LUNA_POSITIONS[_lunaIdx];
+  img.classList.remove('luna-idle');
+  img.classList.add('luna-hop');
+  img.src=LUNA_IMGS.walk;
+  el.style.right=pos.right+'px';
+  el.style.bottom=pos.bottom+'px';
+  setTimeout(()=>{
+    img.classList.remove('luna-hop');
+    img.classList.add('luna-idle');
+    img.src=LUNA_IMGS.idle;
+    _lunaMoving=false;
+  },2900);
+}
+
+function lunaClick(){
+  const chat=document.querySelector('.chat-card');
+  if(chat)chat.scrollIntoView({behavior:'smooth',block:'center'});
+  lunaSay('なに？話しかけてくれたの？嬉しい💜\nチャットで話せるよ！');
+}
+
+function lunaInit(){
+  if(window.innerWidth<1100)return;
+  setTimeout(()=>lunaSay('こんにちは！Lunaだよ💜\nクリックして話しかけてね！'),3500);
+  setInterval(lunaMove, 28000);
+  setInterval(()=>lunaSay(lunaMsgs()), 45000);
+}
+
 // ── INIT ──
 clearDefaultData();
 renderAll();
 bgmRenderTracks();
+lunaInit();
 initSupabase();
 </script>
 </body>
