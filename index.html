@@ -365,6 +365,43 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
   .mq-grid{grid-template-columns:1fr;}
   .stats{grid-template-columns:repeat(2,1fr);}
 }
+/* ── カウントダウンバッジ ── */
+.goal-countdown{display:inline-block;font-size:.58rem;padding:2px 7px;border-radius:20px;font-weight:500;margin-left:4px;vertical-align:middle;}
+.dl-green{background:rgba(140,200,160,.18);color:#4a8060;border:1px solid rgba(140,200,160,.4);}
+.dl-yellow{background:rgba(230,180,80,.18);color:#906830;border:1px solid rgba(230,180,80,.4);}
+.dl-red{background:rgba(220,100,100,.15);color:#a04040;border:1px solid rgba(220,100,100,.35);}
+.dl-over{background:rgba(180,60,60,.15);color:#803030;border:1px solid rgba(180,60,60,.3);}
+/* ── 支出管理 ── */
+.exp-cats{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.exp-cat-btn{padding:3px 10px;border:1px solid var(--lav3);border-radius:20px;background:transparent;font-family:inherit;font-size:.65rem;cursor:pointer;color:var(--text2);transition:all .2s;}
+.exp-cat-btn.active{background:var(--lav2);color:var(--white);border-color:var(--lav2);}
+.exp-totals{display:flex;gap:16px;margin-bottom:10px;padding:10px;background:var(--bg);border-radius:14px;}
+.exp-total-item{flex:1;text-align:center;}
+.exp-total-num{font-size:1.1rem;font-weight:600;color:var(--purple);font-family:'Cormorant Garamond',serif;}
+.exp-total-label{font-size:.58rem;color:var(--text3);margin-top:2px;}
+.exp-history{max-height:150px;overflow-y:auto;margin-top:8px;}
+.exp-item{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px dashed rgba(197,174,232,.2);font-size:.72rem;}
+.exp-item:last-child{border-bottom:none;}
+.exp-badge{padding:1px 7px;border-radius:10px;font-size:.58rem;background:rgba(197,174,232,.2);color:var(--text3);white-space:nowrap;}
+.exp-input-row{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;}
+/* ── BGMプレイヤー ── */
+.bgm-player{position:fixed;bottom:22px;left:22px;z-index:200;background:var(--white);border:1px solid var(--lav3);border-radius:18px;box-shadow:0 4px 24px var(--shadow);padding:12px 14px;width:210px;transition:all .3s;}
+.bgm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.bgm-title{font-size:.68rem;color:var(--purple);font-weight:500;letter-spacing:.05em;}
+.bgm-toggle-btn{background:transparent;border:none;cursor:pointer;font-size:.75rem;color:var(--text3);padding:0;}
+.bgm-tracks{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.bgm-track-btn{padding:5px 10px;border:1px solid var(--lav3);border-radius:12px;background:transparent;font-family:inherit;font-size:.63rem;cursor:pointer;color:var(--text2);text-align:left;transition:all .2s;}
+.bgm-track-btn:hover{border-color:var(--lav2);}
+.bgm-track-btn.active{background:linear-gradient(90deg,var(--lav4),rgba(197,174,232,.2));border-color:var(--lav2);color:var(--purple);}
+.bgm-controls{display:flex;align-items:center;gap:8px;}
+.bgm-play-btn{background:linear-gradient(135deg,var(--lav),var(--lav2));border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;box-shadow:0 2px 10px var(--shadow);flex-shrink:0;transition:transform .15s;}
+.bgm-play-btn:active{transform:scale(.92);}
+.bgm-vol{flex:1;-webkit-appearance:none;height:3px;border-radius:3px;background:var(--lav3);outline:none;cursor:pointer;}
+.bgm-vol::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--lav2);cursor:pointer;}
+.bgm-now{font-size:.58rem;color:var(--text3);text-align:center;margin-top:6px;min-height:12px;}
+.bgm-collapsed .bgm-tracks,.bgm-collapsed .bgm-controls,.bgm-collapsed .bgm-now{display:none;}
+.bgm-collapsed{width:auto;padding:8px 14px;}
+@media(max-width:700px){.bgm-player{display:none;}}
 </style>
 </head>
 <body>
@@ -392,6 +429,25 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
     </div>
   </div>
 </div>
+
+<!-- BGM PLAYER -->
+<div class="bgm-player" id="bgmPlayer">
+  <div class="bgm-header">
+    <span class="bgm-title">🎵 BGM</span>
+    <button class="bgm-toggle-btn" onclick="bgmCollapse()" id="bgmCollapseBtn">▼</button>
+  </div>
+  <div class="bgm-tracks" id="bgmTracks">
+    <button class="bgm-track-btn active" onclick="bgmSelectTrack(0,this)">🎧 Lofi Hip Hop</button>
+    <button class="bgm-track-btn" onclick="bgmSelectTrack(1,this)">☕ Jazz Café</button>
+    <button class="bgm-track-btn" onclick="bgmSelectTrack(2,this)">🌙 Chill Beats</button>
+  </div>
+  <div class="bgm-controls" id="bgmControls">
+    <button class="bgm-play-btn" id="bgmPlayBtn" onclick="bgmToggle()">▶</button>
+    <input class="bgm-vol" type="range" min="0" max="100" value="50" id="bgmVol" oninput="bgmSetVol(this.value)">
+  </div>
+  <div class="bgm-now" id="bgmNow"></div>
+</div>
+<iframe id="bgmFrame" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;top:-9999px" allow="autoplay" src=""></iframe>
 
 <canvas id="decoCanvas"></canvas>
 <div class="app">
@@ -619,6 +675,43 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
     </div>
   </div>
 
+  <!-- ⑧ 支出管理 -->
+  <div class="features-row">
+    <div class="card" style="animation-delay:.38s">
+      <div class="card-label">支出管理</div>
+      <div class="exp-totals">
+        <div class="exp-total-item">
+          <div class="exp-total-num" id="expMonthTotal">0円</div>
+          <div class="exp-total-label">今月の支出</div>
+        </div>
+        <div class="exp-total-item">
+          <div class="exp-total-num" id="expYearTotal">0円</div>
+          <div class="exp-total-label">今年の支出</div>
+        </div>
+      </div>
+      <div class="exp-cats" id="expCats">
+        <button class="exp-cat-btn active" onclick="selectExpCat(this,'食費')">🍱 食費</button>
+        <button class="exp-cat-btn" onclick="selectExpCat(this,'交通費')">🚃 交通費</button>
+        <button class="exp-cat-btn" onclick="selectExpCat(this,'美容')">💄 美容</button>
+        <button class="exp-cat-btn" onclick="selectExpCat(this,'娯楽')">🎮 娯楽</button>
+        <button class="exp-cat-btn" onclick="selectExpCat(this,'日用品')">🛒 日用品</button>
+        <button class="exp-cat-btn" onclick="selectExpCat(this,'その他')">📦 その他</button>
+      </div>
+      <div class="exp-input-row">
+        <input class="task-in" type="number" id="expIn" placeholder="金額 (円)" style="flex:1;min-width:80px" onkeydown="if(event.key==='Enter')addExpense()">
+        <input class="task-in" type="text" id="expNote" placeholder="メモ（任意）" style="flex:1.5;min-width:80px" onkeydown="if(event.key==='Enter')addExpense()">
+        <button class="task-add-btn" onclick="addExpense()">追加 ◆</button>
+      </div>
+      <div class="exp-history" id="expHistory"></div>
+    </div>
+    <div class="card" style="animation-delay:.4s">
+      <div class="card-label" style="display:flex;align-items:center;justify-content:space-between">
+        <span>収支サマリー</span>
+      </div>
+      <div id="balanceSummary" style="padding:8px 0"></div>
+    </div>
+  </div>
+
   <!-- ⑦ 好きな人メモ（PIN付き） -->
   <div class="card" style="animation-delay:.4s">
     <div class="card-label">💜 ひみつのメモ</div>
@@ -661,7 +754,8 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
     <div class="modal-title">◆ 新しい目標を追加</div>
     <div class="fg"><label class="fl">目標タイトル</label><input class="fc" type="text" id="gT" placeholder="例：読書を月10冊達成"></div>
     <div class="fg"><label class="fl">カラー</label><div class="color-row" id="colorRow"></div></div>
-    <div class="fg"><label class="fl">期限</label><input class="fc" type="text" id="gD" placeholder="例：〜9月"></div>
+    <div class="fg"><label class="fl">期限テキスト</label><input class="fc" type="text" id="gD" placeholder="例：〜9月"></div>
+    <div class="fg"><label class="fl">カウントダウン期日</label><input class="fc" type="date" id="gDD"></div>
     <div class="fg"><label class="fl">現在の進捗 (%)</label><input class="fc" type="number" id="gP" placeholder="0" min="0" max="100"></div>
     <div class="mbtns">
       <button class="btn-ng" onclick="closeGoalModal()">キャンセル</button>
@@ -760,7 +854,7 @@ function renderGoals(){
         <div class="goal-task-badge">${dc}/${tc}</div>
       </div>
       <div class="goal-bar"><div class="goal-fill" style="width:${g.pct}%;background:${c.fill}"></div></div>
-      <div class="goal-meta"><span class="goal-pct" style="color:${c.dot}">${g.pct}%</span><span>${g.deadline}</span></div>
+      <div class="goal-meta"><span class="goal-pct" style="color:${c.dot}">${g.pct}%</span><span>${g.deadline}${(()=>{const dl=daysLeft(g.deadlineDate);if(dl===null)return '';const cls=dl<0?'dl-over':dl<7?'dl-red':dl<30?'dl-yellow':'dl-green';const txt=dl<0?'期限超過':`あと${dl}日`;return `<span class="goal-countdown ${cls}">${txt}</span>`;})()}</span></div>
       <button class="goal-del" onclick="deleteGoal('${g.id}')">✕</button>`;
     list.appendChild(div);
   });
@@ -894,10 +988,11 @@ document.getElementById('goalOverlay').addEventListener('click',e=>{if(e.target=
 function addGoal(){
   const name=document.getElementById('gT').value.trim();if(!name)return;
   const deadline=document.getElementById('gD').value.trim()||'期限未定';
+  const deadlineDate=document.getElementById('gDD').value||null;
   const pct=Math.min(100,Math.max(0,parseInt(document.getElementById('gP').value)||0));
-  goals.push({id:'g'+(++gCnt),name,pct,deadline,ci:selColor});
+  goals.push({id:'g'+(++gCnt),name,pct,deadline,deadlineDate,ci:selColor});
   closeGoalModal();
-  ['gT','gD','gP'].forEach(id=>document.getElementById(id).value='');
+  ['gT','gD','gDD','gP'].forEach(id=>document.getElementById(id).value='');
   saveData();renderGoals();renderTasks();renderAlerts();
 }
 
@@ -1331,6 +1426,114 @@ function renderSecretEntries(){
 }
 
 // ══════════════════════════════════════════
+// ── ① 目標カウントダウン helper ──
+function daysLeft(dateStr){
+  if(!dateStr) return null;
+  const diff = new Date(dateStr).setHours(0,0,0,0) - new Date().setHours(0,0,0,0);
+  return Math.ceil(diff/(1000*60*60*24));
+}
+
+// ══════════════════════════════════════════
+// ── ⑧ 支出管理 ──
+let _selExpCat = '食費';
+function selectExpCat(btn, cat){
+  _selExpCat = cat;
+  document.querySelectorAll('.exp-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function loadExpenses(){return JSON.parse(localStorage.getItem('norikaExpenses')||'[]');}
+function addExpense(){
+  const amount=parseInt(document.getElementById('expIn').value)||0;
+  if(!amount)return;
+  const note=document.getElementById('expNote').value.trim();
+  const items=loadExpenses();
+  items.unshift({id:Date.now(),cat:_selExpCat,amount,note,date:getTodayStr()});
+  localStorage.setItem('norikaExpenses',JSON.stringify(items));
+  queueSync('expenses',items);
+  document.getElementById('expIn').value='';document.getElementById('expNote').value='';
+  renderExpenses();
+}
+function renderExpenses(){
+  const items=loadExpenses();
+  const now=new Date();
+  const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const monthItems=items.filter(i=>i.date&&i.date.startsWith(ym));
+  const monthTotal=monthItems.reduce((s,i)=>s+i.amount,0);
+  const yearTotal=items.filter(i=>i.date&&i.date.startsWith(String(now.getFullYear()))).reduce((s,i)=>s+i.amount,0);
+  document.getElementById('expMonthTotal').textContent=monthTotal.toLocaleString()+'円';
+  document.getElementById('expYearTotal').textContent=yearTotal.toLocaleString()+'円';
+  const hist=document.getElementById('expHistory');hist.innerHTML='';
+  if(!items.length){hist.innerHTML='<div class="no-task">支出を記録してみよう！</div>';return;}
+  items.slice(0,8).forEach(i=>{
+    const d=document.createElement('div');d.className='exp-item';
+    d.innerHTML=`<span class="exp-badge">${i.cat}</span><span style="flex:1;color:var(--text2)">${i.note||i.cat}</span><span style="color:var(--purple);font-weight:500">-${i.amount.toLocaleString()}円</span><span style="color:var(--text3);font-size:.6rem;margin-left:4px">${i.date}</span>`;
+    hist.appendChild(d);
+  });
+  // 収支サマリー
+  const rev=loadRevenue();
+  const mRev=rev.entries.filter(e=>e.date&&e.date.startsWith(ym)).reduce((s,e)=>s+e.amount,0);
+  const balance=mRev-monthTotal;
+  const bs=document.getElementById('balanceSummary');
+  bs.innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:8px;background:rgba(180,210,190,.12);border-radius:12px;">
+        <span style="color:var(--text3)">今月の収入</span>
+        <span style="color:#4a8060;font-weight:500">+${mRev.toLocaleString()}円</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:8px;background:rgba(220,100,100,.08);border-radius:12px;">
+        <span style="color:var(--text3)">今月の支出</span>
+        <span style="color:#a04040;font-weight:500">-${monthTotal.toLocaleString()}円</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;padding:10px;background:var(--bg);border-radius:12px;font-weight:600;">
+        <span style="color:var(--text2)">収支バランス</span>
+        <span style="color:${balance>=0?'#4a8060':'#a04040'}">${balance>=0?'+':''}${balance.toLocaleString()}円</span>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// ── BGMプレイヤー ──
+const BGM_TRACKS=[
+  {name:'Lofi Hip Hop',  id:'jfKfPfyJRdk'},
+  {name:'Jazz Café',     id:'Dx5qFachd3A'},
+  {name:'Chill Beats',   id:'5qap5aO4i9A'},
+];
+let _bgmPlaying=false, _bgmTrack=0, _bgmCollapsed=false;
+
+function bgmSelectTrack(idx, btn){
+  _bgmTrack=idx;
+  document.querySelectorAll('.bgm-track-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  if(_bgmPlaying) bgmLoad();
+}
+function bgmLoad(){
+  const frame=document.getElementById('bgmFrame');
+  const t=BGM_TRACKS[_bgmTrack];
+  frame.src=`https://www.youtube.com/embed/${t.id}?autoplay=1&loop=1&playlist=${t.id}&controls=0&mute=0`;
+  document.getElementById('bgmNow').textContent='▶ '+t.name;
+}
+function bgmToggle(){
+  if(_bgmPlaying){
+    document.getElementById('bgmFrame').src='';
+    _bgmPlaying=false;
+    document.getElementById('bgmPlayBtn').textContent='▶';
+    document.getElementById('bgmNow').textContent='';
+  } else {
+    _bgmPlaying=true;
+    bgmLoad();
+    document.getElementById('bgmPlayBtn').textContent='⏸';
+  }
+}
+function bgmSetVol(v){
+  const frame=document.getElementById('bgmFrame');
+  try{ frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[v]}),'*'); }catch(e){}
+}
+function bgmCollapse(){
+  _bgmCollapsed=!_bgmCollapsed;
+  document.getElementById('bgmPlayer').classList.toggle('bgm-collapsed',_bgmCollapsed);
+  document.getElementById('bgmCollapseBtn').textContent=_bgmCollapsed?'▲':'▼';
+}
+
+// ══════════════════════════════════════════
 // ── AUTH & SUPABASE SYNC ──
 let sbClient = null;
 let currentUser = null;
@@ -1339,7 +1542,7 @@ const _syncTimers = {};
 
 function renderAll(){
   renderGoals();renderTasks();renderAlerts();
-  renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();
+  renderHabits();renderWeightChart();renderRevenue();renderKanban();renderInsta();renderMood();renderExpenses();
 }
 
 async function initSupabase(){
@@ -1424,7 +1627,7 @@ async function logout(){
   if(sbClient) await sbClient.auth.signOut();
   currentUser = null;
   ['norikaGoals','norikaTasks','norikaProducts','norikaHabits','norikaWeights',
-   'norikaRevenue','norikaKanban','norikaInsta','norikaMoods','norikaSecret']
+   'norikaRevenue','norikaKanban','norikaInsta','norikaMoods','norikaSecret','norikaExpenses']
     .forEach(k=>localStorage.removeItem(k));
   goals=[...DEFAULT_GOALS]; tasks=[...DEFAULT_TASKS]; products=[...DEFAULT_PRODUCTS];
   renderAll();
@@ -1438,7 +1641,8 @@ async function loadAllFromSupabase(){
     if(error||!data?.length) return;
     const map={goals:'norikaGoals',tasks:'norikaTasks',products:'norikaProducts',
       habits:'norikaHabits',weights:'norikaWeights',revenue:'norikaRevenue',
-      kanban:'norikaKanban',insta:'norikaInsta',moods:'norikaMoods',secret:'norikaSecret'};
+      kanban:'norikaKanban',insta:'norikaInsta',moods:'norikaMoods',secret:'norikaSecret',
+      expenses:'norikaExpenses'};
     data.forEach(r=>{ if(map[r.key]) localStorage.setItem(map[r.key],JSON.stringify(r.value)); });
     goals = JSON.parse(localStorage.getItem('norikaGoals')||'null')||DEFAULT_GOALS;
     tasks = JSON.parse(localStorage.getItem('norikaTasks')||'null')||DEFAULT_TASKS;
@@ -1467,6 +1671,7 @@ async function forceSyncAll(){
     {user_id:currentUser.id,key:'insta',value:insta,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'moods',value:moods,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'secret',value:secret,updated_at:new Date().toISOString()},
+    {user_id:currentUser.id,key:'expenses',value:loadExpenses(),updated_at:new Date().toISOString()},
   ];
   try{
     const {error}=await sbClient.from('mypage_data').upsert(rows,{onConflict:'user_id,key'});
