@@ -436,10 +436,10 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
     <span class="bgm-title">🎵 BGM</span>
     <button class="bgm-toggle-btn" onclick="bgmCollapse()" id="bgmCollapseBtn">▼</button>
   </div>
-  <div class="bgm-tracks" id="bgmTracks">
-    <button class="bgm-track-btn active" onclick="bgmSelectTrack(0,this)">🎧 Lofi Hip Hop</button>
-    <button class="bgm-track-btn" onclick="bgmSelectTrack(1,this)">☕ Jazz Café</button>
-    <button class="bgm-track-btn" onclick="bgmSelectTrack(2,this)">🌙 Chill Beats</button>
+  <div class="bgm-tracks" id="bgmTracks"></div>
+  <div style="display:flex;gap:5px;margin-bottom:8px;">
+    <input id="bgmUrlIn" class="task-in" type="text" placeholder="YouTube URLを貼り付け" style="flex:1;font-size:.62rem;padding:5px 8px;" onkeydown="if(event.key==='Enter')bgmAddCustom()">
+    <button class="task-add-btn" onclick="bgmAddCustom()" style="padding:5px 10px;font-size:.65rem;">追加</button>
   </div>
   <div class="bgm-controls" id="bgmControls">
     <button class="bgm-play-btn" id="bgmPlayBtn" onclick="bgmToggle()">▶</button>
@@ -1493,22 +1493,82 @@ function renderExpenses(){
 
 // ══════════════════════════════════════════
 // ── BGMプレイヤー ──
-const BGM_TRACKS=[
-  {name:'Lofi Hip Hop',  id:'jfKfPfyJRdk'},
-  {name:'Jazz Café',     id:'Dx5qFachd3A'},
-  {name:'Chill Beats',   id:'5qap5aO4i9A'},
+const BGM_PRESET=[
+  {name:'🎧 Lofi Hip Hop', id:'jfKfPfyJRdk'},
+  {name:'☕ Jazz Café',    id:'Dx5qFachd3A'},
+  {name:'🌙 Chill Beats',  id:'5qap5aO4i9A'},
 ];
 let _bgmPlaying=false, _bgmTrack=0, _bgmCollapsed=false;
 
-function bgmSelectTrack(idx, btn){
+function bgmLoadCustomTracks(){return JSON.parse(localStorage.getItem('bgmCustomTracks')||'[]');}
+function bgmSaveCustomTracks(arr){localStorage.setItem('bgmCustomTracks',JSON.stringify(arr));}
+function bgmAllTracks(){return [...BGM_PRESET,...bgmLoadCustomTracks()];}
+
+function bgmExtractId(url){
+  url=url.trim();
+  // youtube.com/watch?v=ID or youtu.be/ID or just ID
+  const m=url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : (url.length===11 ? url : null);
+}
+
+function bgmAddCustom(){
+  const raw=document.getElementById('bgmUrlIn').value.trim();
+  if(!raw)return;
+  const id=bgmExtractId(raw);
+  if(!id){alert('有効なYouTube URLまたは動画IDを入力してね');return;}
+  const name=prompt('曲の名前を入力してね（省略可）','🎵 マイトラック')||'🎵 マイトラック';
+  const customs=bgmLoadCustomTracks();
+  customs.push({name,id,custom:true});
+  bgmSaveCustomTracks(customs);
+  document.getElementById('bgmUrlIn').value='';
+  bgmRenderTracks();
+}
+
+function bgmDeleteCustom(idx){
+  const customs=bgmLoadCustomTracks();
+  customs.splice(idx,0); // will be adjusted below
+  bgmSaveCustomTracks(customs);
+  bgmRenderTracks();
+}
+
+function bgmRenderTracks(){
+  const tracks=bgmAllTracks();
+  const container=document.getElementById('bgmTracks');
+  container.innerHTML='';
+  tracks.forEach((t,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:4px;';
+    const btn=document.createElement('button');
+    btn.className='bgm-track-btn'+(i===_bgmTrack?' active':'');
+    btn.style.flex='1';
+    btn.textContent=t.name;
+    btn.onclick=()=>bgmSelectTrack(i);
+    row.appendChild(btn);
+    if(t.custom){
+      const del=document.createElement('button');
+      del.textContent='✕';
+      del.style.cssText='background:transparent;border:none;cursor:pointer;color:var(--text3);font-size:.7rem;padding:0 2px;flex-shrink:0;';
+      const customIdx=i-BGM_PRESET.length;
+      del.onclick=()=>{
+        const c=bgmLoadCustomTracks();c.splice(customIdx,1);bgmSaveCustomTracks(c);
+        if(_bgmTrack>=bgmAllTracks().length)_bgmTrack=0;
+        bgmRenderTracks();
+      };
+      row.appendChild(del);
+    }
+    container.appendChild(row);
+  });
+}
+
+function bgmSelectTrack(idx){
   _bgmTrack=idx;
-  document.querySelectorAll('.bgm-track-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  bgmRenderTracks();
   if(_bgmPlaying) bgmLoad();
 }
 function bgmLoad(){
-  const frame=document.getElementById('bgmFrame');
-  const t=BGM_TRACKS[_bgmTrack];
-  frame.src=`https://www.youtube.com/embed/${t.id}?autoplay=1&loop=1&playlist=${t.id}&controls=0&mute=0`;
+  const tracks=bgmAllTracks();
+  const t=tracks[_bgmTrack]||tracks[0];
+  document.getElementById('bgmFrame').src=`https://www.youtube.com/embed/${t.id}?autoplay=1&loop=1&playlist=${t.id}&controls=0`;
   document.getElementById('bgmNow').textContent='▶ '+t.name;
 }
 function bgmToggle(){
@@ -1524,8 +1584,7 @@ function bgmToggle(){
   }
 }
 function bgmSetVol(v){
-  const frame=document.getElementById('bgmFrame');
-  try{ frame.contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[v]}),'*'); }catch(e){}
+  try{document.getElementById('bgmFrame').contentWindow.postMessage(JSON.stringify({event:'command',func:'setVolume',args:[v]}),'*');}catch(e){}
 }
 function bgmCollapse(){
   _bgmCollapsed=!_bgmCollapsed;
@@ -1701,6 +1760,7 @@ function queueSync(key,value){
 // ── INIT ──
 clearDefaultData();
 renderAll();
+bgmRenderTracks();
 initSupabase();
 </script>
 </body>
