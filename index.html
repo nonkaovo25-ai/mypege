@@ -1840,13 +1840,15 @@ function lunaClick(){
   const chat=document.querySelector('.chat-card');
   if(chat)chat.scrollIntoView({behavior:'smooth',block:'center'});
   lunaSay('なに？話しかけてくれたの？嬉しい💜\nチャットで話せるよ！');
+  lunaMove();
 }
 
 function lunaInit(){
   if(window.innerWidth<1100)return;
-  setTimeout(()=>lunaSay('こんにちは！Lunaだよ💜\nクリックして話しかけてね！'),3500);
-  setInterval(lunaMove, 28000);
-  setInterval(()=>lunaSay(lunaMsgs()), 45000);
+  setTimeout(()=>lunaSay('こんにちは！Lunaだよ💜\nクリックして話しかけてね！'),2500);
+  setTimeout(lunaMove, 8000);
+  setInterval(lunaMove, 15000);
+  setInterval(()=>lunaSay(lunaMsgs()), 30000);
 }
 
 // ── INIT ──
