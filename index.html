@@ -127,8 +127,13 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 .goal-task-badge{font-size:.62rem;color:var(--text3);background:rgba(197,174,232,.15);padding:1px 7px;border-radius:10px;border:1px solid rgba(197,174,232,.28);white-space:nowrap;}
 .goal-bar{height:5px;background:var(--lav4);border-radius:10px;overflow:hidden;}
 .goal-fill{height:100%;border-radius:10px;transition:width 1s cubic-bezier(.34,1.56,.64,1);}
-.goal-meta{display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;color:var(--text3);}
+.goal-meta{display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;color:var(--text3);align-items:center;gap:8px;}
 .goal-pct{font-weight:500;}
+.goal-progress-hit{cursor:pointer;}
+.goal-bar.goal-progress-hit{transition:opacity .15s,transform .12s;}
+.goal-bar.goal-progress-hit:hover{opacity:.88;}
+.goal-bar.goal-progress-hit:active{transform:scaleY(.96);}
+.goal-pct.goal-progress-hit:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-style:dotted;}
 .goal-del{position:absolute;top:50%;right:0;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;background:rgba(197,174,232,.1);border:1px solid var(--lav3);color:var(--text3);font-size:.62rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:all .18s;line-height:1;font-family:inherit;}
 .goal-item:hover .goal-del,.goal-item.active-filter .goal-del{opacity:1;}
 .goal-del:hover{background:rgba(180,120,180,.2);border-color:var(--mauve);color:var(--purple);}
@@ -586,7 +591,7 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
 
     <div class="card">
       <div class="card-label">目標</div>
-      <div class="filter-hint">クリックでタスクを絞り込み</div>
+      <div class="filter-hint">クリックでタスクを絞り込み／バーと％で進捗変更</div>
       <div id="goalList"></div>
       <button class="filter-clear-btn" id="filterClearBtn" onclick="clearFilter()">✕ 絞り込みを解除する</button>
       <button class="add-goal-btn" onclick="openGoalModal()">◇ 目標を追加</button>
@@ -967,8 +972,8 @@ function renderGoals(){
         <div class="goal-name-text">${g.name}</div>
         <div class="goal-task-badge">${dc}/${tc}</div>
       </div>
-      <div class="goal-bar"><div class="goal-fill" style="width:${g.pct}%;background:${c.fill}"></div></div>
-      <div class="goal-meta"><span class="goal-pct" style="color:${c.dot}">${g.pct}%</span><span>${g.deadline}${(()=>{const dl=daysLeft(g.deadlineDate);if(dl===null)return '';const cls=dl<0?'dl-over':dl<7?'dl-red':dl<30?'dl-yellow':'dl-green';const txt=dl<0?'期限超過':`あと${dl}日`;return `<span class="goal-countdown ${cls}">${txt}</span>`;})()}</span></div>
+      <div class="goal-bar goal-progress-hit" onclick="event.stopPropagation();editGoalProgress('${g.id}')" title="クリックで進捗%を変更"><div class="goal-fill" style="width:${g.pct}%;background:${c.fill}"></div></div>
+      <div class="goal-meta"><span class="goal-pct goal-progress-hit" onclick="event.stopPropagation();editGoalProgress('${g.id}')" title="クリックで進捗%を変更" style="color:${c.dot}">${g.pct}%</span><span>${g.deadline}${(()=>{const dl=daysLeft(g.deadlineDate);if(dl===null)return '';const cls=dl<0?'dl-over':dl<7?'dl-red':dl<30?'dl-yellow':'dl-green';const txt=dl<0?'期限超過':`あと${dl}日`;return `<span class="goal-countdown ${cls}">${txt}</span>`;})()}</span></div>
       <button class="goal-del" onclick="deleteGoal('${g.id}')">✕</button>`;
     list.appendChild(div);
   });
@@ -1116,6 +1121,22 @@ function deleteGoal(gid){
   tasks.forEach(t=>{if(t.gid===gid)t.gid='';});
   if(activeFilter===gid){activeFilter=null;document.getElementById('filterBadge').classList.remove('show');}
   saveData();renderGoals();renderTasks();renderAlerts();
+}
+function editGoalProgress(gid){
+  const g=goals.find(x=>x.id===gid);
+  if(!g)return;
+  const raw=prompt('進捗を 0〜100 の数字で入力してください（現在 '+g.pct+'%）',String(g.pct));
+  if(raw===null)return;
+  const n=parseInt(String(raw).trim(),10);
+  if(Number.isNaN(n)||n<0||n>100){
+    alert('0〜100の数字で入力してね');
+    return;
+  }
+  g.pct=n;
+  saveData();
+  renderGoals();
+  renderTasks();
+  renderAlerts();
 }
 
 // ── AI CHAT ──
