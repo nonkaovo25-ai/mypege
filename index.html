@@ -335,7 +335,7 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
 .pin-label{font-size:.72rem;color:var(--text2);margin-bottom:10px;}
 .pin-display{font-size:1.6rem;letter-spacing:14px;color:var(--purple);margin:10px 0;min-height:36px;}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:210px;margin:0 auto 10px;}
-.pin-key{padding:13px;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;font-family:inherit;font-size:.95rem;color:var(--text);cursor:pointer;transition:all .2s;}
+.pin-key{padding:13px;background:var(--bg);border:1.5px solid var(--lav3);border-radius:12px;font-family:inherit;font-size:.95rem;color:var(--text);cursor:pointer;transition:all .2s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .pin-key:hover{background:var(--lav4);border-color:var(--lav2);}
 .pin-error{font-size:.7rem;color:#c87878;min-height:18px;margin-top:4px;}
 .secret-content{display:none;}
@@ -826,18 +826,18 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
       <div class="pin-label" id="pinLabel">PINを入力してね（初回は新しいPINを設定）</div>
       <div class="pin-display" id="pinDisplay">○○○○</div>
       <div class="pin-pad">
-        <button class="pin-key" onclick="pinPress('1')">1</button>
-        <button class="pin-key" onclick="pinPress('2')">2</button>
-        <button class="pin-key" onclick="pinPress('3')">3</button>
-        <button class="pin-key" onclick="pinPress('4')">4</button>
-        <button class="pin-key" onclick="pinPress('5')">5</button>
-        <button class="pin-key" onclick="pinPress('6')">6</button>
-        <button class="pin-key" onclick="pinPress('7')">7</button>
-        <button class="pin-key" onclick="pinPress('8')">8</button>
-        <button class="pin-key" onclick="pinPress('9')">9</button>
-        <button class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">⌫</button>
-        <button class="pin-key" onclick="pinPress('0')">0</button>
-        <button class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">✕</button>
+        <button type="button" class="pin-key" onclick="pinPress('1')">1</button>
+        <button type="button" class="pin-key" onclick="pinPress('2')">2</button>
+        <button type="button" class="pin-key" onclick="pinPress('3')">3</button>
+        <button type="button" class="pin-key" onclick="pinPress('4')">4</button>
+        <button type="button" class="pin-key" onclick="pinPress('5')">5</button>
+        <button type="button" class="pin-key" onclick="pinPress('6')">6</button>
+        <button type="button" class="pin-key" onclick="pinPress('7')">7</button>
+        <button type="button" class="pin-key" onclick="pinPress('8')">8</button>
+        <button type="button" class="pin-key" onclick="pinPress('9')">9</button>
+        <button type="button" class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">⌫</button>
+        <button type="button" class="pin-key" onclick="pinPress('0')">0</button>
+        <button type="button" class="pin-key" onclick="pinPress('del')" style="color:var(--text3)">✕</button>
       </div>
       <div class="pin-error" id="pinError"></div>
     </div>
@@ -1703,13 +1703,21 @@ function renderMood(){
 // ══════════════════════════════════════════
 // ── ⑦ 好きな人メモ（PIN付き） ──
 let pinInput='';let secretUnlocked=false;
+let _pinDupAt=0,_pinDupKey='';
 function loadSecretPin(){return localStorage.getItem('norikaPIN')||null;}
+function saveSecretPin(pin){
+  localStorage.setItem('norikaPIN',pin);
+  if(sbClient&&currentUser&&/^\d{4}$/.test(pin)) queueSync('secret_pin',pin);
+}
 function renderPinDisplay(){
   document.getElementById('pinDisplay').textContent='●'.repeat(pinInput.length)+'○'.repeat(4-pinInput.length);
 }
 function pinPress(key){
   document.getElementById('pinError').textContent='';
-  if(key==='del'){pinInput=pinInput.slice(0,-1);renderPinDisplay();return;}
+  if(key==='del'){_pinDupKey='';_pinDupAt=Date.now();pinInput=pinInput.slice(0,-1);renderPinDisplay();return;}
+  const now=Date.now();
+  if(key===_pinDupKey&&now-_pinDupAt<55)return;
+  _pinDupKey=key;_pinDupAt=now;
   if(pinInput.length>=4)return;
   pinInput+=key;renderPinDisplay();
   if(pinInput.length===4)setTimeout(checkPin,120);
@@ -1717,7 +1725,7 @@ function pinPress(key){
 function checkPin(){
   const stored=loadSecretPin();
   if(!stored){
-    localStorage.setItem('norikaPIN',pinInput);
+    saveSecretPin(pinInput);
     document.getElementById('pinLabel').textContent='PINを設定したよ！覚えておいてね 💜';
     setTimeout(showSecretContent,400);
   } else if(pinInput===stored){
@@ -2018,7 +2026,7 @@ async function logout(){
   if(sbClient) await sbClient.auth.signOut();
   currentUser = null;
   ['norikaGoals','norikaTasks','norikaProducts','norikaHabits','norikaWeights',
-   'norikaRevenue','norikaKanban','norikaInsta','norikaMoods','norikaSecret','norikaExpenses','norikaIdeaBox']
+   'norikaRevenue','norikaKanban','norikaInsta','norikaMoods','norikaSecret','norikaPIN','norikaExpenses','norikaIdeaBox']
     .forEach(k=>localStorage.removeItem(k));
   goals=[...DEFAULT_GOALS]; tasks=[...DEFAULT_TASKS]; products=[...DEFAULT_PRODUCTS];
   renderAll();
@@ -2045,6 +2053,8 @@ async function loadAllFromSupabase(){
         const merged=remote.length>=localChat.length?remote:localChat;
         localStorage.setItem('lunaHist',JSON.stringify(merged));
         if(localChat.length>remote.length) queueSync('luna_chat',merged);
+      }else if(r.key==='secret_pin'&&typeof r.value==='string'&&/^\d{4}$/.test(r.value)){
+        localStorage.setItem('norikaPIN',r.value);
       }else if(map[r.key]){
         localStorage.setItem(map[r.key],JSON.stringify(r.value));
       }
@@ -2067,7 +2077,7 @@ async function forceSyncAll(){
   btn.textContent='送信中…'; btn.disabled=true;
   const habits=loadHabits(), weights=loadWeights(), revenue=loadRevenue(),
         kanban=loadKanban(), insta=loadInsta(), moods=loadMoods(), secret=loadSecretEntries(),
-        ideabox=loadIdeaBox();
+        ideabox=loadIdeaBox(), secretPin=loadSecretPin();
   const rows=[
     {user_id:currentUser.id,key:'goals',value:goals,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'tasks',value:tasks,updated_at:new Date().toISOString()},
@@ -2079,6 +2089,7 @@ async function forceSyncAll(){
     {user_id:currentUser.id,key:'insta',value:insta,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'moods',value:moods,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'secret',value:secret,updated_at:new Date().toISOString()},
+    ...(secretPin&&/^\d{4}$/.test(secretPin)?[{user_id:currentUser.id,key:'secret_pin',value:secretPin,updated_at:new Date().toISOString()}]:[]),
     {user_id:currentUser.id,key:'expenses',value:loadExpenses(),updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'ideabox',value:ideabox,updated_at:new Date().toISOString()},
     {user_id:currentUser.id,key:'luna_chat',value:hist,updated_at:new Date().toISOString()},
