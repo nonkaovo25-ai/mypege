@@ -15,7 +15,7 @@ const LOGIN_PASS = process.env.LOGIN_PASS || "";
 const LINE_BRIDGE_URL = process.env.LINE_BRIDGE_URL || "";
 const LINE_BRIDGE_SECRET = process.env.LINE_BRIDGE_SECRET || "";
 /** Messaging API のチャンネルシークレット（Webhook 署名検証用・GAS 不要） */
-const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || "";
+const LINE_CHANNEL_SECRET = String(process.env.LINE_CHANNEL_SECRET || "").trim();
 
 function verifyLineSignature(channelSecret, rawBuffer, signatureHeader) {
   if (!channelSecret || !signatureHeader || !Buffer.isBuffer(rawBuffer)) {
@@ -54,11 +54,18 @@ app.get("/ping", (req, res) => res.send("ok"));
  */
 app.post(
   "/line/webhook",
-  express.raw({ type: "application/json" }),
+  express.raw({ type: "*/*", limit: "1mb" }),
   (req, res) => {
     if (!LINE_CHANNEL_SECRET) {
-      console.warn("[line/webhook] LINE_CHANNEL_SECRET is not set");
-      return res.status(503).send("LINE_CHANNEL_SECRET not configured");
+      console.warn(
+        "[line/webhook] LINE_CHANNEL_SECRET is empty — set it in Render Environment and redeploy"
+      );
+      return res
+        .status(503)
+        .type("text/plain")
+        .send(
+          "LINE_CHANNEL_SECRET not configured on server. Add it in Render → Environment, then redeploy."
+        );
     }
     const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
     const sig = req.get("x-line-signature");
@@ -214,4 +221,9 @@ app.get("*", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Luna server running at http://localhost:${PORT}`);
+  if (!LINE_CHANNEL_SECRET) {
+    console.warn(
+      "[line] Webhook POST /line/webhook returns 503 until LINE_CHANNEL_SECRET is set (Render env + redeploy)."
+    );
+  }
 });
