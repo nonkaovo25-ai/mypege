@@ -1,9 +1,10 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const crypto = require("crypto");
 const dotenv = require("dotenv");
 
-dotenv.config();
+dotenv.config({ override: false });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,7 +17,48 @@ const LINE_BRIDGE_URL = process.env.LINE_BRIDGE_URL || "";
 const LINE_BRIDGE_SECRET = process.env.LINE_BRIDGE_SECRET || "";
 /** Messaging API のチャンネルシークレット（リクエストごとに読み直し） */
 function getLineChannelSecret() {
-  return String(process.env.LINE_CHANNEL_SECRET || "").trim();
+  let s = String(process.env.LINE_CHANNEL_SECRET || "")
+    .replace(/^\uFEFF/, "")
+    .trim();
+  if (s) return s;
+  const filePath = String(process.env.LINE_CHANNEL_SECRET_FILE || "").trim();
+  if (filePath) {
+    try {
+      s = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "").trim();
+      if (s) return s;
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  for (const p of ["/etc/secrets/LINE_CHANNEL_SECRET", "/run/secrets/line_channel_secret"]) {
+    try {
+      if (fs.existsSync(p)) {
+        s = fs.readFileSync(p, "utf8").replace(/^\uFEFF/, "").trim();
+        if (s) return s;
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  return "";
+}
+
+/** 診断用（値は出さない） */
+function lineSecretEnvDiagnostics() {
+  const hasKey = Object.prototype.hasOwnProperty.call(process.env, "LINE_CHANNEL_SECRET");
+  const raw = hasKey ? String(process.env.LINE_CHANNEL_SECRET) : "";
+  const len = raw.replace(/^\uFEFF/, "").trim().length;
+  return { hasEnvKey: hasKey, nonEmptyLength: len };
+}
+
+function captureLineWebhookRawBody(req, res, next) {
+  const chunks = [];
+  req.on("data", (chunk) => chunks.push(chunk));
+  req.on("end", () => {
+    req.body = chunks.length ? Buffer.concat(chunks) : Buffer.alloc(0);
+    next();
+  });
+  req.on("error", (err) => next(err));
 }
 
 function verifyLineSignature(channelSecret, rawBuffer, signatureHeader) {
@@ -53,65 +95,77 @@ app.get("/ping", (req, res) => res.send("ok"));
  * Webhook 用シークレットがこのプロセスで見えているか（値は返さない）
  * ブラウザで https://ホスト/line/webhook を開いて確認
  */
-app.get("/line/webhook", (req, res) => {
+function lineWebhookGetHandler(req, res) {
   const configured = Boolean(getLineChannelSecret());
+  const diag = lineSecretEnvDiagnostics();
   res.status(200).json({
     ok: true,
     channelSecretConfigured: configured,
+    envKeyLINE_CHANNEL_SECRET: diag.hasEnvKey,
+    /** 値の文字数のみ（中身は出しません）。0 なら Render の Value が空 */
+    secretCharLength: diag.nonEmptyLength,
     postPath: "/line/webhook",
     message: configured
       ? "POST は LINE からのみ。ここは確認用の GET です。"
-      : "このサーバーが LINE_CHANNEL_SECRET を読めていません。Render の Environment で Key を正確に LINE_CHANNEL_SECRET にし、Save 後に再デプロイしてください。",
+      : diag.hasEnvKey && diag.nonEmptyLength === 0
+        ? "環境変数キーはあるが値が空です。Render で Value を入れ直し、前後にスペースや引用符が無いか確認してください。"
+        : "LINE_CHANNEL_SECRET がこのプロセスに渡っていません。Render の Environment で Key 名を LINE_CHANNEL_SECRET にし、Save 後に必ず再デプロイしてください。",
   });
-});
+}
+app.get("/line/webhook", lineWebhookGetHandler);
+app.get("/line/webhook/", lineWebhookGetHandler);
+
+function lineWebhookPostHandler(req, res) {
+  const channelSecret = getLineChannelSecret();
+  if (!channelSecret) {
+    const diag = lineSecretEnvDiagnostics();
+    console.warn(
+      "[line/webhook] LINE_CHANNEL_SECRET empty",
+      "hasKey=",
+      diag.hasEnvKey,
+      "len=",
+      diag.nonEmptyLength
+    );
+    return res
+      .status(503)
+      .type("text/plain")
+      .send(
+        "LINE_CHANNEL_SECRET not configured on server. Add it in Render → Environment, then redeploy."
+      );
+  }
+  const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+  const sig = req.get("x-line-signature");
+  if (!verifyLineSignature(channelSecret, raw, sig)) {
+    console.warn("[line/webhook] invalid X-Line-Signature");
+    return res.status(401).send("Unauthorized");
+  }
+  try {
+    if (raw.length > 0) {
+      const payload = JSON.parse(raw.toString("utf8"));
+      const events = Array.isArray(payload.events) ? payload.events : [];
+      if (events.length > 0) {
+        console.log(
+          "[line/webhook]",
+          events.length,
+          "event(s):",
+          events.map((e) => e.type).join(", ")
+        );
+      }
+    }
+  } catch (e) {
+    console.warn("[line/webhook] JSON parse error:", e?.message);
+    return res.status(400).send("Bad Request");
+  }
+  return res.status(200).json({});
+}
 
 /**
  * LINE Messaging API の Webhook（LINE Developers に登録する URL）
  * 例: https://xxx.onrender.com/line/webhook
- * ※ express.json より前に raw で受けないと署名検証が壊れます。
+ * express.raw の type 判定で本文が空になるケースを避け、ストリームを直接読む。
  */
-app.post(
-  "/line/webhook",
-  express.raw({ type: "*/*", limit: "1mb" }),
-  (req, res) => {
-    const channelSecret = getLineChannelSecret();
-    if (!channelSecret) {
-      console.warn(
-        "[line/webhook] LINE_CHANNEL_SECRET is empty — set it in Render Environment and redeploy"
-      );
-      return res
-        .status(503)
-        .type("text/plain")
-        .send(
-          "LINE_CHANNEL_SECRET not configured on server. Add it in Render → Environment, then redeploy."
-        );
-    }
-    const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
-    const sig = req.get("x-line-signature");
-    if (!verifyLineSignature(channelSecret, raw, sig)) {
-      console.warn("[line/webhook] invalid X-Line-Signature");
-      return res.status(401).send("Unauthorized");
-    }
-    try {
-      if (raw.length > 0) {
-        const payload = JSON.parse(raw.toString("utf8"));
-        const events = Array.isArray(payload.events) ? payload.events : [];
-        if (events.length > 0) {
-          console.log(
-            "[line/webhook]",
-            events.length,
-            "event(s):",
-            events.map((e) => e.type).join(", ")
-          );
-        }
-      }
-    } catch (e) {
-      console.warn("[line/webhook] JSON parse error:", e?.message);
-      return res.status(400).send("Bad Request");
-    }
-    return res.status(200).json({});
-  }
-);
+app.post("/line/webhook", captureLineWebhookRawBody, lineWebhookPostHandler);
+app.post("/line/webhook/", captureLineWebhookRawBody, lineWebhookPostHandler);
 
 app.use(express.json({ limit: "1mb" }));
 
