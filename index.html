@@ -147,6 +147,7 @@ header{text-align:center;padding:44px 0 28px;position:relative;}
 /* SETTINGS */
 .setting-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed rgba(197,174,232,.22);font-size:.78rem;color:var(--text2);}
 .setting-row:last-child{border-bottom:none;}
+.setting-hint-line{font-size:.62rem;color:var(--text3);line-height:1.5;padding:0 0 10px;margin-top:-6px;border-bottom:1px dashed rgba(197,174,232,.22);}
 .toggle{width:34px;height:18px;border-radius:20px;background:var(--silver);position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;}
 .toggle.on{background:var(--lav2);}
 .toggle::after{content:'';position:absolute;width:12px;height:12px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.15);}
@@ -602,6 +603,8 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
       <div class="setting-row"><span>朝のブリーフィング</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row"><span>優先順位の自動整理</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row"><span>進捗アラート</span><div class="toggle on" id="alertToggle" onclick="this.classList.toggle('on');renderAlerts()"></div></div>
+      <div class="setting-row"><span>LINEと進捗を同期</span><div class="toggle" id="lineNotifyToggle" onclick="this.classList.toggle('on');saveLineNotifyPref();renderAlerts();"></div></div>
+      <div class="setting-hint-line">オンかつ進捗アラートONのとき、画面と同じ文面のアラートを1日1回まで送信。「↑同期」で目標・タスク一覧スナップショットも送ります（Render の環境変数 LINE_BRIDGE_URL で GAS 等を指定）</div>
       <div class="setting-row"><span>週次レポート</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row" style="margin-top:4px;">
         <span id="authUserEmail" style="font-size:.68rem;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未ログイン</span>
@@ -1053,30 +1056,106 @@ function updateStats(){
   document.getElementById('sRate').textContent=rate+'%';
 }
 
-// ── ALERTS ──
-function renderAlerts(){
-  const area=document.getElementById('alertArea');
-  area.innerHTML='';
-  if(!document.getElementById('alertToggle').classList.contains('on')) return;
+// ── ALERTS & LINE ブリッジ（画面と同じ文面を Webhook へ） ──
+let lineBridgeEnabled=false;
+function simpleLineHash(str){
+  let h=0;
+  for(let i=0;i<str.length;i++)h=Math.imul(31,h)+str.charCodeAt(i)|0;
+  return String(h);
+}
+function collectProgressAlerts(){
+  const out=[];
   goals.forEach(g=>{
-    const c=COLORS[g.ci]||COLORS[0];
     const remaining=tasks.filter(t=>t.gid===g.id&&!t.done).length;
     let msg=null;
     if(g.pct<35) msg=`進捗が ${g.pct}% とペースが遅めです。タスクを追加して優先度を上げてみましょう！`;
     else if(remaining===0&&g.pct<100) msg=`紐づいているタスクがゼロです。次のアクションを設定しましょう ◆`;
-    if(!msg) return;
+    if(msg) out.push({goalId:g.id,name:g.name,namePlain:stripEmoji(g.name),pct:g.pct,remaining,msg,ci:g.ci});
+  });
+  return out;
+}
+function saveLineNotifyPref(){
+  localStorage.setItem('norikaLineNotify',document.getElementById('lineNotifyToggle')?.classList.contains('on')?'1':'0');
+}
+function restoreLineNotifyToggle(){
+  const el=document.getElementById('lineNotifyToggle');
+  if(!el)return;
+  if(localStorage.getItem('norikaLineNotify')==='1') el.classList.add('on');
+  else el.classList.remove('on');
+}
+async function pushLineBridge(body){
+  if(!lineBridgeEnabled)return false;
+  try{
+    const r=await fetch('/api/line-bridge',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    return j.ok===true;
+  }catch(e){ console.warn('line-bridge',e); return false; }
+}
+function scheduleLineBridgeFromAlerts(items){
+  if(!lineBridgeEnabled)return;
+  if(!document.getElementById('lineNotifyToggle')?.classList.contains('on'))return;
+  if(!document.getElementById('alertToggle')?.classList.contains('on'))return;
+  if(!items||items.length===0)return;
+  const fingerprint=simpleLineHash(JSON.stringify(items.map(i=>({id:i.goalId,p:i.pct,r:i.remaining,m:i.msg}))));
+  const day=new Date().toISOString().slice(0,10);
+  try{
+    const prev=JSON.parse(localStorage.getItem('norikaLineDedup')||'{}');
+    if(prev.day===day&&prev.fp===fingerprint)return;
+  }catch(_){}
+  const lineText=`💜 進捗アラート (${day})\n\n`+items.map(i=>`【${i.namePlain}】\nLunaより：${i.msg}`).join('\n\n');
+  pushLineBridge({
+    kind:'alerts',
+    dedupe:{day,fingerprint},
+    alerts:items.map(i=>({goalId:i.goalId,name:i.name,namePlain:i.namePlain,pct:i.pct,remaining:i.remaining,message:i.msg})),
+    lineText,
+  }).then(ok=>{ if(ok) localStorage.setItem('norikaLineDedup',JSON.stringify({day,fp:fingerprint})); });
+}
+function buildLineSnapshot(){
+  const open=tasks.filter(t=>!t.done);
+  const doneC=tasks.filter(t=>t.done).length;
+  return{
+    kind:'snapshot',
+    syncedAt:new Date().toISOString(),
+    stats:{tasksDone:doneC,tasksLeft:open.length,tasksTotal:tasks.length},
+    progressAlerts:collectProgressAlerts(),
+    goals:goals.map(g=>({id:g.id,name:g.name,namePlain:stripEmoji(g.name),pct:g.pct,deadline:g.deadline,deadlineDate:g.deadlineDate||null})),
+    tasksOpen:open.map(t=>{ const g=goals.find(x=>x.id===t.gid); return{text:t.text,gid:t.gid,goalPlain:g?stripEmoji(g.name):'',quad:t.quad}; }),
+  };
+}
+function formatLineSnapshotText(s){
+  const lines=[`💜 MyPage 同期 ${s.syncedAt.slice(0,16).replace('T',' ')}`];
+  lines.push(`タスク：未完了 ${s.stats.tasksLeft}／完了 ${s.stats.tasksDone}`);
+  s.goals.slice(0,12).forEach(g=>lines.push(`・${g.namePlain} ${g.pct}%（期限 ${g.deadline}）`));
+  if(s.goals.length>12) lines.push(`…他 ${s.goals.length-12} 件`);
+  if(s.tasksOpen.length){
+    lines.push('未完了タスク：');
+    s.tasksOpen.slice(0,15).forEach(t=>lines.push(`・${t.text}${t.goalPlain?'（'+t.goalPlain+'）':''}`));
+    if(s.tasksOpen.length>15) lines.push(`…他 ${s.tasksOpen.length-15} 件`);
+  }
+  return lines.join('\n');
+}
+function renderAlerts(){
+  const area=document.getElementById('alertArea');
+  area.innerHTML='';
+  if(!document.getElementById('alertToggle').classList.contains('on')) return;
+  const items=collectProgressAlerts();
+  items.forEach(item=>{
+    const c=COLORS[item.ci]||COLORS[0];
+    const g=goals.find(x=>x.id===item.goalId);
     const al=document.createElement('div');
     al.className='luna-alert';
-    al.innerHTML=`<div class="alert-icon">🎀</div><div class="alert-body"><div class="alert-title" style="color:${c.text}">${stripEmoji(g.name)} の進捗アラート</div><div class="alert-text">Lunaより：${msg}</div></div><button class="alert-close" onclick="this.parentElement.remove()">✕</button>`;
+    al.innerHTML=`<div class="alert-icon">🎀</div><div class="alert-body"><div class="alert-title" style="color:${c.text}">${item.namePlain} の進捗アラート</div><div class="alert-text">Lunaより：${item.msg}</div></div><button class="alert-close" onclick="this.parentElement.remove()">✕</button>`;
     al.onclick=e=>{
       if(e.target.classList.contains('alert-close'))return;
-      const userMsg=`「${g.name}」の進捗 ${g.pct}%・残タスク ${remaining} 件について詳しくアドバイスがほしい`;
+      if(!g)return;
+      const userMsg=`「${g.name}」の進捗 ${g.pct}%・残タスク ${item.remaining} 件について詳しくアドバイスがほしい`;
       addMsg(userMsg,'user');
-      const _al=`目標「${g.name}」は進捗${g.pct}%で残タスクが${remaining}件です。具体的なアドバイスと励ましをください。`;
+      const _al=`目標「${g.name}」は進捗${g.pct}%で残タスクが${item.remaining}件です。具体的なアドバイスと励ましをください。`;
       callLuna(_al,tryIdeaBoxSaveAndGetNote(_al));
     };
     area.appendChild(al);
   });
+  scheduleLineBridgeFromAlerts(items);
 }
 
 // ── ADD TASK ──
@@ -1946,7 +2025,8 @@ function renderAll(){
 
 async function initSupabase(){
   try{
-    const cfg = await fetch('/api/config').then(r=>r.json()).catch(()=>({}));
+    const cfg = await fetch('/api/config',{credentials:'include'}).then(r=>r.json()).catch(()=>({}));
+    lineBridgeEnabled = !!cfg.lineBridgeEnabled;
     if(!cfg.supabaseUrl || !cfg.supabaseAnonKey){ hideAuthOverlay(); return; }
     sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
     const { data:{ session } } = await sbClient.auth.getSession();
@@ -2098,6 +2178,11 @@ async function forceSyncAll(){
     const {error}=await sbClient.from('mypage_data').upsert(rows,{onConflict:'user_id,key'});
     if(error) throw error;
     btn.textContent='✓ 完了！';
+    if(lineBridgeEnabled&&document.getElementById('lineNotifyToggle')?.classList.contains('on')){
+      const snap=buildLineSnapshot();
+      snap.lineText=formatLineSnapshotText(snap);
+      pushLineBridge(snap);
+    }
     setTimeout(()=>{btn.textContent='↑同期';btn.disabled=false;},2000);
   } catch(e){
     console.error('forceSyncAll error:',e);
@@ -2208,6 +2293,7 @@ function lunaInit(){
 
 // ── INIT ──
 clearDefaultData();
+restoreLineNotifyToggle();
 renderAll();
 bgmRenderTracks();
 lunaInit();

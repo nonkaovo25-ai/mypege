@@ -10,6 +10,9 @@ const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const API_KEY = process.env.OPENAI_API_KEY || "";
 const LOGIN_USER = process.env.LOGIN_USER || "";
 const LOGIN_PASS = process.env.LOGIN_PASS || "";
+/** Webhook URL（例: Google Apps Script のデプロイ URL）。LINE 送信は GAS 側で行う。 */
+const LINE_BRIDGE_URL = process.env.LINE_BRIDGE_URL || "";
+const LINE_BRIDGE_SECRET = process.env.LINE_BRIDGE_SECRET || "";
 
 // Basic認証ミドルウェア
 function basicAuth(req, res, next) {
@@ -95,7 +98,55 @@ app.get("/api/config", (req, res) => {
   res.json({
     supabaseUrl: process.env.SUPABASE_URL || "",
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+    /** フロントが LINE ブリッジ呼び出しを出すか（URL は出さない） */
+    lineBridgeEnabled: Boolean(LINE_BRIDGE_URL),
   });
+});
+
+/**
+ * ダッシュボードと同じ内容を外部（GAS → LINE 等）へ渡す。
+ * body: { kind: "alerts" | "snapshot", ... }
+ */
+app.post("/api/line-bridge", async (req, res) => {
+  try {
+    if (!LINE_BRIDGE_URL) {
+      return res.status(200).json({
+        ok: false,
+        skipped: true,
+        reason: "LINE_BRIDGE_URL is not set",
+      });
+    }
+    const payload = {
+      ...(req.body && typeof req.body === "object" ? req.body : {}),
+      source: "mypege",
+      at: new Date().toISOString(),
+    };
+    const headers = { "Content-Type": "application/json" };
+    if (LINE_BRIDGE_SECRET) {
+      headers["X-Bridge-Secret"] = LINE_BRIDGE_SECRET;
+    }
+    const upstream = await fetch(LINE_BRIDGE_URL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    const text = await upstream.text();
+    if (!upstream.ok) {
+      console.warn("[line-bridge] upstream", upstream.status, text.slice(0, 300));
+      return res.status(502).json({
+        ok: false,
+        upstreamStatus: upstream.status,
+        detail: text.slice(0, 200),
+      });
+    }
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[line-bridge]", err?.message || err);
+    return res.status(500).json({
+      ok: false,
+      error: err?.message || String(err),
+    });
+  }
 });
 
 app.get("*", (req, res) => {
