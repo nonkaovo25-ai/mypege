@@ -14,8 +14,10 @@ const LOGIN_PASS = process.env.LOGIN_PASS || "";
 /** Webhook URL（任意・外部へ JSON 転送）。LINE 送信先が別サーバーのとき。 */
 const LINE_BRIDGE_URL = process.env.LINE_BRIDGE_URL || "";
 const LINE_BRIDGE_SECRET = process.env.LINE_BRIDGE_SECRET || "";
-/** Messaging API のチャンネルシークレット（Webhook 署名検証用・GAS 不要） */
-const LINE_CHANNEL_SECRET = String(process.env.LINE_CHANNEL_SECRET || "").trim();
+/** Messaging API のチャンネルシークレット（リクエストごとに読み直し） */
+function getLineChannelSecret() {
+  return String(process.env.LINE_CHANNEL_SECRET || "").trim();
+}
 
 function verifyLineSignature(channelSecret, rawBuffer, signatureHeader) {
   if (!channelSecret || !signatureHeader || !Buffer.isBuffer(rawBuffer)) {
@@ -48,6 +50,22 @@ function basicAuth(req, res, next) {
 app.get("/ping", (req, res) => res.send("ok"));
 
 /**
+ * Webhook 用シークレットがこのプロセスで見えているか（値は返さない）
+ * ブラウザで https://ホスト/line/webhook を開いて確認
+ */
+app.get("/line/webhook", (req, res) => {
+  const configured = Boolean(getLineChannelSecret());
+  res.status(200).json({
+    ok: true,
+    channelSecretConfigured: configured,
+    postPath: "/line/webhook",
+    message: configured
+      ? "POST は LINE からのみ。ここは確認用の GET です。"
+      : "このサーバーが LINE_CHANNEL_SECRET を読めていません。Render の Environment で Key を正確に LINE_CHANNEL_SECRET にし、Save 後に再デプロイしてください。",
+  });
+});
+
+/**
  * LINE Messaging API の Webhook（LINE Developers に登録する URL）
  * 例: https://xxx.onrender.com/line/webhook
  * ※ express.json より前に raw で受けないと署名検証が壊れます。
@@ -56,7 +74,8 @@ app.post(
   "/line/webhook",
   express.raw({ type: "*/*", limit: "1mb" }),
   (req, res) => {
-    if (!LINE_CHANNEL_SECRET) {
+    const channelSecret = getLineChannelSecret();
+    if (!channelSecret) {
       console.warn(
         "[line/webhook] LINE_CHANNEL_SECRET is empty — set it in Render Environment and redeploy"
       );
@@ -69,7 +88,7 @@ app.post(
     }
     const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
     const sig = req.get("x-line-signature");
-    if (!verifyLineSignature(LINE_CHANNEL_SECRET, raw, sig)) {
+    if (!verifyLineSignature(channelSecret, raw, sig)) {
       console.warn("[line/webhook] invalid X-Line-Signature");
       return res.status(401).send("Unauthorized");
     }
@@ -221,7 +240,7 @@ app.get("*", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Luna server running at http://localhost:${PORT}`);
-  if (!LINE_CHANNEL_SECRET) {
+  if (!getLineChannelSecret()) {
     console.warn(
       "[line] Webhook POST /line/webhook returns 503 until LINE_CHANNEL_SECRET is set (Render env + redeploy)."
     );
