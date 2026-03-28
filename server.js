@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const crypto = require("crypto");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -10,9 +11,27 @@ const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const API_KEY = process.env.OPENAI_API_KEY || "";
 const LOGIN_USER = process.env.LOGIN_USER || "";
 const LOGIN_PASS = process.env.LOGIN_PASS || "";
-/** Webhook URL（例: Google Apps Script のデプロイ URL）。LINE 送信は GAS 側で行う。 */
+/** Webhook URL（任意・外部へ JSON 転送）。LINE 送信先が別サーバーのとき。 */
 const LINE_BRIDGE_URL = process.env.LINE_BRIDGE_URL || "";
 const LINE_BRIDGE_SECRET = process.env.LINE_BRIDGE_SECRET || "";
+/** Messaging API のチャンネルシークレット（Webhook 署名検証用・GAS 不要） */
+const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || "";
+
+function verifyLineSignature(channelSecret, rawBuffer, signatureHeader) {
+  if (!channelSecret || !signatureHeader || !Buffer.isBuffer(rawBuffer)) {
+    return false;
+  }
+  const hash = crypto.createHmac("sha256", channelSecret).update(rawBuffer).digest("base64");
+  const sig = String(signatureHeader).trim();
+  if (hash.length !== sig.length) {
+    return false;
+  }
+  try {
+    return crypto.timingSafeEqual(Buffer.from(hash, "utf8"), Buffer.from(sig, "utf8"));
+  } catch {
+    return false;
+  }
+}
 
 // Basic認証ミドルウェア
 function basicAuth(req, res, next) {
@@ -25,10 +44,50 @@ function basicAuth(req, res, next) {
   return res.status(401).send("認証が必要です");
 }
 
-app.use(express.json({ limit: "1mb" }));
-
 // ヘルスチェック（Basic認証不要）
 app.get("/ping", (req, res) => res.send("ok"));
+
+/**
+ * LINE Messaging API の Webhook（LINE Developers に登録する URL）
+ * 例: https://xxx.onrender.com/line/webhook
+ * ※ express.json より前に raw で受けないと署名検証が壊れます。
+ */
+app.post(
+  "/line/webhook",
+  express.raw({ type: "application/json" }),
+  (req, res) => {
+    if (!LINE_CHANNEL_SECRET) {
+      console.warn("[line/webhook] LINE_CHANNEL_SECRET is not set");
+      return res.status(503).send("LINE_CHANNEL_SECRET not configured");
+    }
+    const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+    const sig = req.get("x-line-signature");
+    if (!verifyLineSignature(LINE_CHANNEL_SECRET, raw, sig)) {
+      console.warn("[line/webhook] invalid X-Line-Signature");
+      return res.status(401).send("Unauthorized");
+    }
+    try {
+      if (raw.length > 0) {
+        const payload = JSON.parse(raw.toString("utf8"));
+        const events = Array.isArray(payload.events) ? payload.events : [];
+        if (events.length > 0) {
+          console.log(
+            "[line/webhook]",
+            events.length,
+            "event(s):",
+            events.map((e) => e.type).join(", ")
+          );
+        }
+      }
+    } catch (e) {
+      console.warn("[line/webhook] JSON parse error:", e?.message);
+      return res.status(400).send("Bad Request");
+    }
+    return res.status(200).json({});
+  }
+);
+
+app.use(express.json({ limit: "1mb" }));
 
 app.use(basicAuth);
 app.use(express.static(path.join(__dirname)));

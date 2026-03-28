@@ -604,7 +604,7 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
       <div class="setting-row"><span>優先順位の自動整理</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row"><span>進捗アラート</span><div class="toggle on" id="alertToggle" onclick="this.classList.toggle('on');renderAlerts()"></div></div>
       <div class="setting-row"><span>LINEと進捗を同期</span><div class="toggle" id="lineNotifyToggle" onclick="this.classList.toggle('on');saveLineNotifyPref();renderAlerts();"></div></div>
-      <div class="setting-hint-line">オンかつ進捗アラートONのとき、画面と同じ文面のアラートを1日1回まで送信。「↑同期」で目標・タスク一覧スナップショットも送ります（Render の環境変数 LINE_BRIDGE_URL で GAS 等を指定）</div>
+      <div class="setting-hint-line">オンかつ進捗アラートONのとき、同じ文面を1日1回までサーバー経由で送信。「↑同期」でスナップショットも。LINE からの受信は LINE Developers の Webhook を https://（あなたのドメイン）/line/webhook にし、Render に LINE_CHANNEL_SECRET を設定（LINE_BRIDGE_URL は任意）</div>
       <div class="setting-row"><span>週次レポート</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       <div class="setting-row" style="margin-top:4px;">
         <span id="authUserEmail" style="font-size:.68rem;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">未ログイン</span>
