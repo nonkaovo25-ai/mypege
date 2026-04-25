@@ -2081,6 +2081,10 @@ async function authSubmit(){
   const errEl=document.getElementById('authError');
   if(!email||!pass){ errEl.textContent='メールとパスワードを入力してね 💜'; return; }
   if(pass.length<6){ errEl.textContent='パスワードは6文字以上にしてね'; return; }
+  if(!sbClient){
+    errEl.textContent='サーバーに接続できていないよ 💜 リロードしてもダメな場合はRenderかSupabaseの状態を確認してね';
+    return;
+  }
   const btn=document.getElementById('authSubmitBtn');
   btn.textContent='処理中…'; errEl.textContent='';
   try{
@@ -2088,8 +2092,14 @@ async function authSubmit(){
       ? await sbClient.auth.signInWithPassword({email,password:pass})
       : await sbClient.auth.signUp({email,password:pass});
     if(result.error){
-      errEl.textContent = result.error.message.includes('Invalid login')
-        ? 'メールかパスワードが違うよ 💜' : result.error.message;
+      const msg=result.error.message||'';
+      if(msg.includes('Invalid login')||msg.includes('invalid_credentials')){
+        errEl.textContent='メールかパスワードが違うよ 💜';
+      }else if(msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('network')){
+        errEl.textContent='Supabaseに繋がらないよ 💜 supabase.com でプロジェクトが停止(paused)になっていないか確認してね。停止中なら「Resume」を押すと直ります。';
+      }else{
+        errEl.textContent=msg;
+      }
       btn.textContent = _authMode==='login' ? 'ログイン ◆' : '登録する ◆';
     } else if(_authMode==='signup' && !result.data.session){
       errEl.style.color='var(--purple2)';
@@ -2097,7 +2107,12 @@ async function authSubmit(){
       btn.textContent='登録する ◆';
     }
   } catch(e){
-    errEl.textContent='エラーが起きたよ、もう一度試してね';
+    const msg=String(e?.message||e||'');
+    if(msg.toLowerCase().includes('failed to fetch')||msg.toLowerCase().includes('network')){
+      errEl.textContent='Supabaseに繋がらないよ 💜 supabase.com でプロジェクトが停止(paused)になっていないか確認してResumeを押してね。';
+    }else{
+      errEl.textContent='エラーが起きたよ、もう一度試してね（'+msg.slice(0,60)+'）';
+    }
     btn.textContent=_authMode==='login' ? 'ログイン ◆' : '登録する ◆';
   }
 }
