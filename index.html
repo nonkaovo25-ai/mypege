@@ -473,9 +473,179 @@ html{scrollbar-width:thin;scrollbar-color:rgba(171,139,209,.55) rgba(230,220,245
 .luna-bubble{position:absolute;bottom:115px;right:0;background:var(--white);border:1px solid var(--lav3);border-radius:16px 16px 0 16px;padding:9px 13px;font-size:.68rem;color:var(--text);max-width:190px;box-shadow:0 4px 18px var(--shadow);line-height:1.6;white-space:pre-wrap;animation:bubblePop .25s ease;z-index:151;}
 @keyframes bubblePop{from{opacity:0;transform:scale(.8) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
 @media(max-width:1100px){#lunaChar{display:none;}}
+
+/* ── PORTFOLIO DRAWER ── */
+.pfBtn{position:fixed;top:18px;right:22px;z-index:300;width:46px;height:46px;border-radius:14px;background:var(--white);border:1.5px solid var(--lav3);box-shadow:0 4px 18px var(--shadow);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all .22s;}
+.pfBtn:hover{border-color:var(--lav2);box-shadow:0 6px 22px rgba(120,90,168,.2);transform:scale(1.05);}
+.pfBtn span{display:block;width:18px;height:2px;background:var(--lav2);border-radius:2px;transition:all .25s;}
+.pfBtn.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.pfBtn.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.pfBtn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.pfOverlay{position:fixed;inset:0;background:rgba(46,32,64,.32);backdrop-filter:blur(6px);z-index:290;opacity:0;pointer-events:none;transition:opacity .3s;}
+.pfOverlay.open{opacity:1;pointer-events:all;}
+.pfDrawer{position:fixed;top:0;right:0;height:100%;width:min(480px,100vw);background:var(--bg);border-left:1px solid var(--lav3);box-shadow:-8px 0 40px rgba(120,90,168,.15);z-index:295;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column;}
+.pfDrawer.open{transform:translateX(0);}
+.pfDrawer::-webkit-scrollbar{width:5px;}
+.pfDrawer::-webkit-scrollbar-thumb{background:rgba(171,139,209,.4);border-radius:4px;}
+.pfD-head{background:linear-gradient(135deg,var(--lav4),var(--white));border-bottom:1px solid var(--lav3);padding:28px 26px 22px;position:sticky;top:0;z-index:2;}
+.pfD-tag{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.pfD-tag::before{content:'◆';font-size:.45rem;color:var(--lav2);}
+.pfD-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:var(--purple);letter-spacing:.08em;margin-bottom:4px;}
+.pfD-sub{font-size:.68rem;color:var(--text2);line-height:1.6;}
+.pfD-body{padding:22px 24px;display:flex;flex-direction:column;gap:22px;flex:1;}
+.pfD-section-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.pfD-section-title::before{content:'';flex:1;height:1px;background:var(--lav3);}
+.pfD-section-title::after{content:'';flex:1;height:1px;background:var(--lav3);}
+.pfCard{background:var(--white);border:1px solid var(--lav3);border-radius:18px;overflow:hidden;box-shadow:0 3px 18px var(--shadow);transition:transform .2s,box-shadow .2s;text-decoration:none;display:block;color:inherit;}
+.pfCard:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(120,90,168,.18);}
+.pfCard-top{position:relative;height:130px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.pfCard-preview{width:100%;height:100%;object-fit:cover;}
+.pfCard-preview-mock{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.8rem;}
+.pfCard-badge{position:absolute;top:10px;left:12px;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.55);backdrop-filter:blur(4px);color:var(--purple);font-weight:500;}
+.pfCard-new{background:rgba(197,174,232,.75);border-color:var(--lav2);}
+.pfCard-body{padding:14px 16px 16px;}
+.pfCard-title{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--purple);margin-bottom:5px;letter-spacing:.04em;}
+.pfCard-desc{font-size:.72rem;color:var(--text2);line-height:1.6;margin-bottom:10px;}
+.pfCard-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.pfTag{font-size:.6rem;padding:2px 8px;border-radius:10px;background:rgba(197,174,232,.15);border:1px solid rgba(197,174,232,.35);color:var(--purple2);}
+.pfCard-link{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:.7rem;color:var(--lav2);background:rgba(197,174,232,.12);border:1px solid rgba(197,174,232,.4);padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;text-decoration:none;}
+.pfCard-link:hover{background:rgba(197,174,232,.28);border-color:var(--lav2);}
+.pfSkills{display:flex;flex-wrap:wrap;gap:7px;}
+.pfSkill{font-size:.68rem;padding:5px 12px;background:var(--white);border:1px solid var(--lav3);border-radius:12px;color:var(--text2);box-shadow:0 1px 6px var(--shadow);}
+.pfProfile{display:flex;align-items:center;gap:14px;background:var(--white);border:1px solid var(--lav3);border-radius:18px;padding:16px;}
+.pfProfile-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--lav2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;border:3px solid var(--white);box-shadow:0 3px 14px rgba(197,174,232,.45);}
+.pfProfile-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--purple);margin-bottom:3px;}
+.pfProfile-bio{font-size:.68rem;color:var(--text2);line-height:1.6;}
+.pfContact{background:linear-gradient(135deg,var(--lav4),rgba(200,168,200,.12));border:1px solid var(--lav3);border-radius:18px;padding:18px;text-align:center;}
+.pfContact p{font-size:.72rem;color:var(--text2);line-height:1.7;margin-bottom:12px;}
+.pfContact-btn{display:inline-block;padding:9px 24px;background:linear-gradient(135deg,var(--lav),var(--lav2));border:none;border-radius:20px;font-family:inherit;font-size:.75rem;color:white;cursor:pointer;box-shadow:0 3px 14px rgba(197,174,232,.45);text-decoration:none;transition:opacity .2s;}
+.pfContact-btn:hover{opacity:.85;}
+/* gradient backgrounds for mock previews */
+.pfMock-purple{background:linear-gradient(135deg,#e8e0f5 0%,#d5c8ee 50%,#ede0f8 100%);}
+.pfMock-pink{background:linear-gradient(135deg,#f5e8f0 0%,#eed0e4 50%,#f8eaf5 100%);}
+.pfMock-mint{background:linear-gradient(135deg,#e0f0f5 0%,#c8e4ee 50%,#e8f5f0 100%);}
 </style>
 </head>
 <body>
+<!-- PORTFOLIO HAMBURGER BUTTON -->
+<button class="pfBtn" id="pfBtn" onclick="pfToggle()" title="ポートフォリオを見る" aria-label="ポートフォリオ">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- PORTFOLIO DRAWER OVERLAY -->
+<div class="pfOverlay" id="pfOverlay" onclick="pfClose()"></div>
+
+<!-- PORTFOLIO DRAWER -->
+<div class="pfDrawer" id="pfDrawer">
+  <div class="pfD-head">
+    <div class="pfD-tag">Portfolio</div>
+    <div class="pfD-title">制作実績</div>
+    <div class="pfD-sub">Webツール・ダッシュボード・LP制作に対応しています。<br>ご依頼・お問い合わせはランサーズよりどうぞ。</div>
+  </div>
+  <div class="pfD-body">
+
+    <!-- プロフィール -->
+    <div>
+      <div class="pfD-section-title">Profile</div>
+      <div class="pfProfile">
+        <div class="pfProfile-av">✦</div>
+        <div>
+          <div class="pfProfile-name">norika</div>
+          <div class="pfProfile-bio">HTML / CSS / JavaScript を使ったフロントエンド開発が得意です。<br>管理ツール・ダッシュボード・LPなど幅広く対応します。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 制作実績 -->
+    <div>
+      <div class="pfD-section-title">Works</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Work 1: AIダッシュボード -->
+        <a href="demo.html" target="_blank" class="pfCard">
+          <div class="pfCard-top pfMock-purple">
+            <div class="pfCard-preview-mock">🗂️</div>
+            <span class="pfCard-badge pfCard-new">New</span>
+          </div>
+          <div class="pfCard-body">
+            <div class="pfCard-title">AI秘書つき パーソナル管理ダッシュボード</div>
+            <div class="pfCard-desc">目標・タスク・習慣・売上・体重・気分ログを一元管理できる多機能ダッシュボード。AIアシスタントとのチャット機能、アイディアBOXなど搭載。</div>
+            <div class="pfCard-tags">
+              <span class="pfTag">HTML</span>
+              <span class="pfTag">CSS</span>
+              <span class="pfTag">JavaScript</span>
+              <span class="pfTag">Supabase</span>
+              <span class="pfTag">AI連携</span>
+            </div>
+            <span class="pfCard-link">デモを見る →</span>
+          </div>
+        </a>
+
+        <!-- Work 2: LP -->
+        <div class="pfCard" style="cursor:default;opacity:.72;">
+          <div class="pfCard-top pfMock-pink">
+            <div class="pfCard-preview-mock">💐</div>
+            <span class="pfCard-badge" style="background:rgba(255,255,255,.55);">Coming Soon</span>
+          </div>
+          <div class="pfCard-body">
+            <div class="pfCard-title">エステサロン 架空LP</div>
+            <div class="pfCard-desc">ファーストビュー・料金表・お問い合わせフォームを含む1ページLPのサンプル。レスポンシブ対応。</div>
+            <div class="pfCard-tags">
+              <span class="pfTag">HTML</span>
+              <span class="pfTag">CSS</span>
+              <span class="pfTag">LP制作</span>
+              <span class="pfTag">レスポンシブ</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Work 3: フォームツール -->
+        <div class="pfCard" style="cursor:default;opacity:.72;">
+          <div class="pfCard-top pfMock-mint">
+            <div class="pfCard-preview-mock">📋</div>
+            <span class="pfCard-badge" style="background:rgba(255,255,255,.55);">Coming Soon</span>
+          </div>
+          <div class="pfCard-body">
+            <div class="pfCard-title">お問い合わせ・予約フォーム</div>
+            <div class="pfCard-desc">バリデーション付きフォーム。Supabase/メール連携による送信確認機能付き。</div>
+            <div class="pfCard-tags">
+              <span class="pfTag">JavaScript</span>
+              <span class="pfTag">Supabase</span>
+              <span class="pfTag">フォーム</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- スキル -->
+    <div>
+      <div class="pfD-section-title">Skills</div>
+      <div class="pfSkills">
+        <span class="pfSkill">HTML5</span>
+        <span class="pfSkill">CSS3</span>
+        <span class="pfSkill">JavaScript</span>
+        <span class="pfSkill">Supabase</span>
+        <span class="pfSkill">レスポンシブデザイン</span>
+        <span class="pfSkill">UI / UX設計</span>
+        <span class="pfSkill">アニメーション</span>
+        <span class="pfSkill">AIチャット連携</span>
+      </div>
+    </div>
+
+    <!-- コンタクト -->
+    <div>
+      <div class="pfD-section-title">Contact</div>
+      <div class="pfContact">
+        <p>ご依頼・ご相談はランサーズのメッセージよりお気軽にどうぞ。<br>まずはお見積もりからでもOKです ✦</p>
+        <a href="https://www.lancers.jp/" target="_blank" class="pfContact-btn">ランサーズで依頼する ◆</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- AUTH OVERLAY -->
 <div id="authOverlay" style="position:fixed;inset:0;background:rgba(46,32,64,.55);backdrop-filter:blur(14px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;">
   <div style="background:var(--white);border:1px solid var(--lav3);border-radius:24px;padding:32px 26px;width:100%;max-width:360px;box-shadow:0 16px 56px rgba(120,90,168,.25);position:relative;animation:fadeUp .35s ease;">
@@ -2359,6 +2529,27 @@ function lunaInit(){
   setInterval(lunaMove, 15000);
   setInterval(()=>lunaSay(lunaMsgs()), 30000);
 }
+
+// ── PORTFOLIO DRAWER ──
+function pfToggle(){
+  const btn=document.getElementById('pfBtn');
+  const drawer=document.getElementById('pfDrawer');
+  const overlay=document.getElementById('pfOverlay');
+  const isOpen=drawer.classList.contains('open');
+  if(isOpen){pfClose();}else{
+    btn.classList.add('open');
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+}
+function pfClose(){
+  document.getElementById('pfBtn').classList.remove('open');
+  document.getElementById('pfDrawer').classList.remove('open');
+  document.getElementById('pfOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')pfClose();});
 
 // ── INIT ──
 clearDefaultData();
