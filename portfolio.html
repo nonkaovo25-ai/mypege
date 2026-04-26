@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>norika | Web Developer Portfolio</title>
+<meta name="description" content="フロントエンドエンジニア norika のポートフォリオ。管理ツール・LP・Webアプリ制作を承ります。">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{background:#fff;color:#1a1a2e;font-family:'DM Sans','Noto Sans JP',sans-serif;line-height:1.7;overflow-x:hidden;}
+
+/* ── DESIGN TOKENS ── */
+:root{
+  --ink:    #1a1a2e;
+  --ink2:   #4a4a6a;
+  --ink3:   #8888aa;
+  --line:   #e8e8f0;
+  --bg:     #fafafa;
+  --bg2:    #f4f4f8;
+  --accent: #6c5ce7;
+  --accent2:#a29bfe;
+  --white:  #ffffff;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(26,26,46,.07);
+  --shadow-hover: 0 12px 40px rgba(26,26,46,.13);
+}
+
+/* ── TYPOGRAPHY ── */
+.serif{font-family:'DM Serif Display',serif;}
+h1,h2,h3{font-family:'DM Serif Display',serif;font-weight:400;line-height:1.2;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);transition:box-shadow .3s;}
+nav.scrolled{box-shadow:0 2px 20px rgba(26,26,46,.06);}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--ink);text-decoration:none;letter-spacing:.04em;}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:.82rem;color:var(--ink2);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;}
+.nav-links a:hover{color:var(--accent);}
+.nav-cta{font-size:.78rem;padding:8px 20px;background:var(--ink);color:#fff;border-radius:30px;text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:all .25s;}
+.nav-cta:hover{background:var(--accent);transform:translateY(-1px);}
+.nav-menu{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.nav-menu span{display:block;width:20px;height:1.5px;background:var(--ink);transition:all .25s;}
+@media(max-width:700px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  .nav-menu{display:flex;}
+}
+
+/* ── MOBILE MENU ── */
+.mob-menu{position:fixed;inset:0;background:var(--white);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+.mob-menu.open{transform:translateX(0);}
+.mob-menu a{font-size:1.4rem;font-family:'DM Serif Display',serif;color:var(--ink);text-decoration:none;}
+.mob-close{position:absolute;top:20px;right:24px;font-size:1.4rem;background:none;border:none;cursor:pointer;color:var(--ink);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:64px 40px 0;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-20%;right:-10%;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(108,92,231,.07) 0%,transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-10%;left:-5%;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(162,155,254,.06) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.hero-eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--accent);}
+.hero-h1{font-size:clamp(2.4rem,5vw,3.8rem);color:var(--ink);margin-bottom:22px;line-height:1.15;}
+.hero-h1 em{font-style:italic;color:var(--accent);}
+.hero-desc{font-size:1rem;color:var(--ink2);line-height:1.8;margin-bottom:36px;max-width:440px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-primary{padding:14px 32px;background:var(--ink);color:#fff;border-radius:30px;text-decoration:none;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;transition:all .25s;display:inline-block;}
+.btn-primary:hover{background:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,92,231,.3);}
+.btn-outline{padding:14px 32px;background:transparent;color:var(--ink);border:1.5px solid var(--line);border-radius:30px;text-decoration:none;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;transition:all .25s;display:inline-block;}
+.btn-outline:hover{border-color:var(--ink);transform:translateY(-2px);}
+.hero-visual{position:relative;}
+.hero-card{background:var(--white);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.hero-card-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.hero-card-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:500;}
+.hero-card-title{font-size:.88rem;font-weight:500;color:var(--ink);}
+.hero-card-sub{font-size:.72rem;color:var(--ink3);}
+.hero-stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+.hero-stat{background:var(--bg);border-radius:12px;padding:14px 10px;text-align:center;}
+.hero-stat-num{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--accent);line-height:1;}
+.hero-stat-lbl{font-size:.62rem;color:var(--ink3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;}
+.hero-bar-item{margin-bottom:10px;}
+.hero-bar-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--ink2);margin-bottom:5px;}
+.hero-bar-track{height:4px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+.hero-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent2),var(--accent));}
+.hero-tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px;}
+.hero-tag{font-size:.62rem;padding:4px 10px;background:var(--bg2);border-radius:20px;color:var(--ink2);}
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;gap:48px;}
+  .hero-visual{display:none;}
+}
+@media(max-width:700px){.hero{padding:80px 20px 40px;}}
+
+/* ── SECTION BASE ── */
+section{padding:100px 40px;}
+@media(max-width:700px){section{padding:60px 20px;}}
+.container{max-width:1100px;margin:0 auto;}
+.section-label{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.section-label::before{content:'';width:28px;height:1px;background:var(--accent);}
+.section-title{font-size:clamp(1.8rem,3.5vw,2.6rem);color:var(--ink);margin-bottom:16px;}
+.section-desc{font-size:.95rem;color:var(--ink2);max-width:520px;line-height:1.8;}
+
+/* ── WORKS ── */
+.works{background:var(--bg);}
+.works-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px;}
+@media(max-width:900px){.works-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.works-grid{grid-template-columns:1fr;}}
+.work-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;}
+.work-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);}
+.work-card.coming{opacity:.62;cursor:default;}
+.work-card.coming:hover{transform:none;box-shadow:var(--shadow);}
+.work-thumb{height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.work-thumb-icon{font-size:3.5rem;position:relative;z-index:1;}
+.thumb-1{background:linear-gradient(135deg,#ede9fe 0%,#ddd6fe 50%,#c4b5fd 100%);}
+.thumb-2{background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 50%,#6ee7b7 100%);}
+.thumb-3{background:linear-gradient(135deg,#fce7f3 0%,#fbcfe8 50%,#f9a8d4 100%);}
+.work-badge{position:absolute;top:12px;left:14px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:20px;backdrop-filter:blur(6px);}
+.badge-live{background:rgba(255,255,255,.75);color:#5b21b6;border:1px solid rgba(255,255,255,.8);}
+.badge-soon{background:rgba(255,255,255,.6);color:var(--ink2);border:1px solid rgba(255,255,255,.7);}
+.work-body{padding:22px 22px 24px;display:flex;flex-direction:column;flex:1;}
+.work-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--ink);margin-bottom:8px;}
+.work-desc{font-size:.82rem;color:var(--ink2);line-height:1.75;flex:1;}
+.work-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
+.work-tag{font-size:.6rem;padding:3px 9px;background:var(--bg2);border-radius:10px;color:var(--ink2);}
+.work-link{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:.78rem;color:var(--accent);font-weight:500;text-decoration:none;transition:gap .2s;}
+.work-link:hover{gap:10px;}
+.work-link::after{content:'→';}
+.work-soon-label{display:inline-block;margin-top:18px;font-size:.72rem;color:var(--ink3);font-style:italic;}
+
+/* ── SKILLS ── */
+.skills-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px;}
+@media(max-width:900px){.skills-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.skills-grid{grid-template-columns:1fr;}}
+.skill-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);transition:transform .22s;}
+.skill-card:hover{transform:translateY(-4px);}
+.skill-icon{font-size:1.8rem;margin-bottom:14px;}
+.skill-name{font-size:.88rem;font-weight:500;color:var(--ink);margin-bottom:6px;}
+.skill-desc{font-size:.75rem;color:var(--ink2);line-height:1.7;}
+
+/* ── PROFILE ── */
+.profile{background:var(--bg);}
+.profile-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+@media(max-width:800px){.profile-inner{grid-template-columns:1fr;gap:40px;}}
+.profile-visual{display:flex;flex-direction:column;gap:14px;}
+.profile-av-wrap{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:3rem;border:4px solid var(--white);box-shadow:0 8px 32px rgba(108,92,231,.25);margin-bottom:6px;}
+.profile-name-big{font-family:'DM Serif Display',serif;font-size:2rem;color:var(--ink);}
+.profile-role{font-size:.78rem;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;}
+.profile-numbers{display:flex;gap:28px;margin-top:12px;}
+.pnum{text-align:center;}
+.pnum-n{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--ink);}
+.pnum-l{font-size:.65rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;}
+.profile-text h3{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--ink);margin-bottom:18px;}
+.profile-text p{font-size:.9rem;color:var(--ink2);line-height:1.9;margin-bottom:14px;}
+.profile-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:6px;}
+.profile-list li{font-size:.83rem;color:var(--ink2);display:flex;align-items:center;gap:10px;}
+.profile-list li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+
+/* ── CONTACT ── */
+.contact-inner{max-width:640px;margin:0 auto;text-align:center;}
+.contact-inner .section-label{justify-content:center;}
+.contact-inner .section-label::before{display:none;}
+.contact-inner .section-title{margin-bottom:14px;}
+.contact-inner .section-desc{margin:0 auto 40px;}
+.contact-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;}
+@media(max-width:500px){.contact-cards{grid-template-columns:1fr;}}
+.contact-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-align:left;}
+.contact-card-icon{font-size:1.4rem;margin-bottom:10px;}
+.contact-card-title{font-size:.82rem;font-weight:500;color:var(--ink);margin-bottom:4px;}
+.contact-card-desc{font-size:.74rem;color:var(--ink2);line-height:1.6;}
+.contact-btn{display:inline-block;padding:16px 48px;background:var(--ink);color:#fff;border-radius:30px;text-decoration:none;font-size:.88rem;letter-spacing:.08em;text-transform:uppercase;transition:all .25s;}
+.contact-btn:hover{background:var(--accent);transform:translateY(-2px);box-shadow:0 8px 28px rgba(108,92,231,.3);}
+
+/* ── FOOTER ── */
+footer{padding:40px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-logo{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--ink);}
+.footer-copy{font-size:.72rem;color:var(--ink3);}
+.footer-links{display:flex;gap:20px;}
+.footer-links a{font-size:.72rem;color:var(--ink2);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s;}
+.footer-links a:hover{color:var(--accent);}
+@media(max-width:600px){footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:8px;}}
+
+/* ── ANIMATIONS ── */
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+.fade-in-d1{transition-delay:.1s;}
+.fade-in-d2{transition-delay:.2s;}
+.fade-in-d3{transition-delay:.3s;}
+
+/* ── DIVIDER ── */
+.divider{width:48px;height:1.5px;background:var(--line);margin:20px 0;}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--ink3),transparent);animation:scrollLine 2s ease-in-out infinite;}
+@keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="portfolio.html" class="nav-logo">norika</a>
+  <div class="nav-links">
+    <a href="#works">Works</a>
+    <a href="#skills">Skills</a>
+    <a href="#profile">About</a>
+    <a href="#contact" class="nav-cta">Contact</a>
+  </div>
+  <button class="nav-menu" id="navMenu" aria-label="メニュー">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕</button>
+  <a href="#works" onclick="closeMob()">Works</a>
+  <a href="#skills" onclick="closeMob()">Skills</a>
+  <a href="#profile" onclick="closeMob()">About</a>
+  <a href="#contact" onclick="closeMob()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" style="padding-top:64px;">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-eyebrow fade-in">Frontend Developer</div>
+      <h1 class="hero-h1 fade-in fade-in-d1">
+        使いやすくて、<br><em>美しい</em>Webを。
+      </h1>
+      <p class="hero-desc fade-in fade-in-d2">
+        HTML / CSS / JavaScriptを使い、管理ツール・LP・Webアプリを制作しています。<br>
+        デザインから実装まで、丁寧にお届けします。
+      </p>
+      <div class="hero-btns fade-in fade-in-d3">
+        <a href="#works" class="btn-primary">制作実績を見る</a>
+        <a href="#contact" class="btn-outline">お問い合わせ</a>
+      </div>
+    </div>
+    <div class="hero-visual fade-in fade-in-d2">
+      <div class="hero-card">
+        <div class="hero-card-head">
+          <div class="hero-card-av">✦</div>
+          <div>
+            <div class="hero-card-title">パーソナル管理ダッシュボード</div>
+            <div class="hero-card-sub">AI秘書 Luna 搭載</div>
+          </div>
+        </div>
+        <div class="hero-stat-grid">
+          <div class="hero-stat"><div class="hero-stat-num">12</div><div class="hero-stat-lbl">継続日数</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">8</div><div class="hero-stat-lbl">完了タスク</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">67%</div><div class="hero-stat-lbl">達成率</div></div>
+        </div>
+        <div class="hero-bar-item">
+          <div class="hero-bar-label"><span>ポートフォリオ完成</span><span>75%</span></div>
+          <div class="hero-bar-track"><div class="hero-bar-fill" style="width:75%"></div></div>
+        </div>
+        <div class="hero-bar-item">
+          <div class="hero-bar-label"><span>月収20万達成</span><span>42%</span></div>
+          <div class="hero-bar-track"><div class="hero-bar-fill" style="width:42%"></div></div>
+        </div>
+        <div class="hero-tag-row">
+          <span class="hero-tag">HTML</span>
+          <span class="hero-tag">CSS</span>
+          <span class="hero-tag">JavaScript</span>
+          <span class="hero-tag">Supabase</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- WORKS -->
+<section class="works" id="works">
+  <div class="container">
+    <div class="section-label fade-in">Works</div>
+    <h2 class="section-title fade-in fade-in-d1">制作実績</h2>
+    <p class="section-desc fade-in fade-in-d2">実際に制作したWebツール・サービスの一覧です。デモページからすぐに動作を確認いただけます。</p>
+    <div class="works-grid">
+
+      <!-- Work 1 -->
+      <div class="work-card fade-in">
+        <div class="work-thumb thumb-1">
+          <span class="work-thumb-icon">🗂️</span>
+          <span class="work-badge badge-live">Live Demo</span>
+        </div>
+        <div class="work-body">
+          <h3 class="work-title">AI秘書つき パーソナル管理ダッシュボード</h3>
+          <p class="work-desc">目標・タスク・習慣・売上・体重・気分ログを一元管理できる多機能ダッシュボード。AIキャラクター「Luna」との会話機能、アイディアBOX、優先順位マトリクスなど搭載。Supabase連携でデータをクラウド保存。</p>
+          <div class="work-tags">
+            <span class="work-tag">HTML / CSS</span>
+            <span class="work-tag">JavaScript</span>
+            <span class="work-tag">Supabase</span>
+            <span class="work-tag">OpenAI API</span>
+          </div>
+          <a href="demo.html" target="_blank" class="work-link">デモを見る</a>
+        </div>
+      </div>
+
+      <!-- Work 2 -->
+      <div class="work-card coming fade-in fade-in-d1">
+        <div class="work-thumb thumb-2">
+          <span class="work-thumb-icon">💪</span>
+          <span class="work-badge badge-soon">Coming Soon</span>
+        </div>
+        <div class="work-body">
+          <h3 class="work-title">LINE連携 ダイエットパーソナルトレーナー</h3>
+          <p class="work-desc">LINEから体重・食事・運動を記録すると、AIパーソナルトレーナーが毎日アドバイスを返信。グラフで進捗を可視化し、目標達成をサポートするWebアプリ。</p>
+          <div class="work-tags">
+            <span class="work-tag">LINE Messaging API</span>
+            <span class="work-tag">JavaScript</span>
+            <span class="work-tag">AI連携</span>
+          </div>
+          <span class="work-soon-label">準備中 — 近日公開予定</span>
+        </div>
+      </div>
+
+      <!-- Work 3 -->
+      <div class="work-card coming fade-in fade-in-d2">
+        <div class="work-thumb thumb-3">
+          <span class="work-thumb-icon">💐</span>
+          <span class="work-badge badge-soon">Coming Soon</span>
+        </div>
+        <div class="work-body">
+          <h3 class="work-title">エステサロン LP制作サンプル</h3>
+          <p class="work-desc">ファーストビュー・サービス紹介・料金表・お客様の声・お問い合わせフォームを含む1ページLP。スマホ・PCどちらでも美しく表示されるレスポンシブデザイン。</p>
+          <div class="work-tags">
+            <span class="work-tag">HTML / CSS</span>
+            <span class="work-tag">JavaScript</span>
+            <span class="work-tag">LP制作</span>
+            <span class="work-tag">レスポンシブ</span>
+          </div>
+          <span class="work-soon-label">準備中 — 近日公開予定</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="container">
+    <div class="section-label fade-in">Skills</div>
+    <h2 class="section-title fade-in fade-in-d1">できること</h2>
+    <p class="section-desc fade-in fade-in-d2">フロントエンドを中心に、デザインから実装・APIの繋ぎ込みまで対応しています。</p>
+    <div class="skills-grid">
+      <div class="skill-card fade-in">
+        <div class="skill-icon">🎨</div>
+        <div class="skill-name">UI / UXデザイン</div>
+        <div class="skill-desc">使いやすく見た目の良いデザインを設計。アニメーション・タイポグラフィ・カラーへのこだわりがあります。</div>
+      </div>
+      <div class="skill-card fade-in fade-in-d1">
+        <div class="skill-icon">💻</div>
+        <div class="skill-name">フロントエンド実装</div>
+        <div class="skill-desc">HTML / CSS / JavaScriptでレスポンシブ対応のWebサイト・Webアプリを実装します。</div>
+      </div>
+      <div class="skill-card fade-in fade-in-d2">
+        <div class="skill-icon">🔗</div>
+        <div class="skill-name">API連携</div>
+        <div class="skill-desc">OpenAI / Supabase / LINE Messaging APIなど、外部サービスとの連携実装が得意です。</div>
+      </div>
+      <div class="skill-card fade-in fade-in-d3">
+        <div class="skill-icon">📱</div>
+        <div class="skill-name">レスポンシブ対応</div>
+        <div class="skill-desc">スマホ・タブレット・PCすべてで美しく機能するレイアウトを実装します。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE -->
+<section class="profile" id="profile">
+  <div class="container">
+    <div class="profile-inner">
+      <div class="profile-visual fade-in">
+        <div class="profile-av-wrap">✦</div>
+        <div class="profile-name-big">norika</div>
+        <div class="profile-role">Frontend Developer</div>
+        <div class="divider"></div>
+        <div class="profile-numbers">
+          <div class="pnum"><div class="pnum-n">3+</div><div class="pnum-l">制作実績</div></div>
+          <div class="pnum"><div class="pnum-n">∞</div><div class="pnum-l">こだわり</div></div>
+        </div>
+      </div>
+      <div class="profile-text fade-in fade-in-d1">
+        <h3>ものを作ることが<br>好きです。</h3>
+        <p>HTMLとCSSを書くのが楽しくて、どうすれば使いやすくなるか・どうすれば美しく見えるかを考えながらつくっています。</p>
+        <p>管理ツールやダッシュボードのように「実際に毎日使えるもの」を作るのが特に好きです。ユーザーが「使ってよかった」と感じるものをお届けしたいと思っています。</p>
+        <ul class="profile-list">
+          <li>管理ツール・ダッシュボード開発</li>
+          <li>LP・コーポレートサイト制作</li>
+          <li>AIチャット・LINE Bot連携</li>
+          <li>デザインから実装まで一気通貫</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-inner">
+      <div class="section-label fade-in">Contact</div>
+      <h2 class="section-title fade-in fade-in-d1">お仕事のご依頼</h2>
+      <p class="section-desc fade-in fade-in-d2">ランサーズからお気軽にご連絡ください。まずはお見積もりのご相談からでも大歓迎です。</p>
+      <div class="contact-cards fade-in fade-in-d1">
+        <div class="contact-card">
+          <div class="contact-card-icon">⚡</div>
+          <div class="contact-card-title">スピード対応</div>
+          <div class="contact-card-desc">ご連絡から24時間以内にご返答いたします。</div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-card-icon">💬</div>
+          <div class="contact-card-title">丁寧なコミュニケーション</div>
+          <div class="contact-card-desc">要件をしっかりヒアリングし、イメージ通りに仕上げます。</div>
+        </div>
+      </div>
+      <a href="https://www.lancers.jp/" target="_blank" class="contact-btn fade-in fade-in-d2">ランサーズで依頼する →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">norika</div>
+  <div class="footer-links">
+    <a href="#works">Works</a>
+    <a href="#skills">Skills</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 norika. All rights reserved.</div>
+</footer>
+
+<script>
+// NAV scroll effect
+window.addEventListener('scroll',()=>{
+  document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>20);
+});
+
+// Mobile menu
+document.getElementById('navMenu').addEventListener('click',()=>{
+  document.getElementById('mobMenu').classList.add('open');
+});
+document.getElementById('mobClose').addEventListener('click',closeMob);
+function closeMob(){document.getElementById('mobMenu').classList.remove('open');}
+
+// Scroll fade-in
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.12});
+document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
