@@ -1,4 +1,4 @@
-:HL["/mypege/beautysalon-lp/_next/static/chunks/03rl4a98mga3e.css","style"]
-:HL["/mypege/beautysalon-lp/_next/static/chunks/05--nl3-0ix_g.css","style"]
-:HL["/mypege/beautysalon-lp/_next/static/chunks/0uzmxp.fa.126.css","style"]
+:HL["/beautysalon-lp/_next/static/chunks/03rl4a98mga3e.css","style"]
+:HL["/beautysalon-lp/_next/static/chunks/05--nl3-0ix_g.css","style"]
+:HL["/beautysalon-lp/_next/static/chunks/0uzmxp.fa.126.css","style"]
 0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"/_not-found","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"ihgzsvIjBniz7Hzgq6oUH"}

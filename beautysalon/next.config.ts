@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "export",
-  basePath: "/mypege/beautysalon-lp",
+  basePath: "/beautysalon-lp",
   trailingSlash: true,
   images: { unoptimized: true },
 };
