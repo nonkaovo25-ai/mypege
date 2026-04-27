@@ -4,4 +4,4 @@
 :HL["/beautysalon-lp/_next/static/media/01e4147cff8141ee-s.p.10ked.7w885.g.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/beautysalon-lp/_next/static/media/68d0ad77fd2c49e3-s.p.0wghyr-.6qbey.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/beautysalon-lp/_next/static/media/f274a7d773de54c9-s.163vk5zt4o7.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"ihgzsvIjBniz7Hzgq6oUH"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"6FWxpqVfvvD6Py6X0kzuG"}
