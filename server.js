@@ -88,6 +88,17 @@ function basicAuth(req, res, next) {
   return res.status(401).send("認証が必要です");
 }
 
+// portfolio.html と beautysalon-lp は認証不要、それ以外は認証必要
+function conditionalBasicAuth(req, res, next) {
+  if (
+    req.path === "/portfolio.html" ||
+    req.path.startsWith("/beautysalon-lp")
+  ) {
+    return next();
+  }
+  return basicAuth(req, res, next);
+}
+
 // ヘルスチェック（Basic認証不要）
 app.get("/ping", (req, res) => res.send("ok"));
 
@@ -169,7 +180,7 @@ app.post("/line/webhook/", captureLineWebhookRawBody, lineWebhookPostHandler);
 
 app.use(express.json({ limit: "1mb" }));
 
-app.use(basicAuth);
+app.use(conditionalBasicAuth);
 app.use(express.static(path.join(__dirname)));
 
 app.post("/api/luna", async (req, res) => {
