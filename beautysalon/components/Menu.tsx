@@ -64,12 +64,12 @@ const menus: Record<Category, { name: string; time: string; price: string; desc:
 
 export default function Menu() {
   const [active, setActive] = useState<Category>("facial");
+  const [displayed, setDisplayed] = useState<Category>("facial");
   const listRef = useRef<HTMLDivElement>(null);
-  const prevActive = useRef<Category>("facial");
+  const isAnimating = useRef(false);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-
     gsap.fromTo(
       ".menu-tab",
       { opacity: 0, y: 30 },
@@ -79,31 +79,63 @@ export default function Menu() {
         duration: 0.7,
         stagger: 0.1,
         ease: "power3.out",
-        scrollTrigger: {
-          trigger: "#menu",
-          start: "top 75%",
-        },
+        scrollTrigger: { trigger: "#menu", start: "top 75%" },
       }
     );
   }, []);
 
+  // 初回マウント時のアニメーション
   useEffect(() => {
     if (!listRef.current) return;
     const items = listRef.current.querySelectorAll(".menu-item");
     gsap.fromTo(
       items,
-      { opacity: 0, x: prevActive.current === active ? 0 : active === "facial" ? -30 : 30 },
-      { opacity: 1, x: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }
+      { opacity: 0, x: -40 },
+      { opacity: 1, x: 0, duration: 0.45, stagger: 0.07, ease: "power2.out" }
     );
-    prevActive.current = active;
-  }, [active]);
+  }, []);
+
+  // タブ切り替え：スライドアウト → コンテンツ差し替え → スライドイン
+  useEffect(() => {
+    if (displayed === active) return;
+    if (!listRef.current) return;
+    isAnimating.current = true;
+    const items = listRef.current.querySelectorAll(".menu-item");
+    const toLeft = active === "body";
+
+    gsap.to(items, {
+      opacity: 0,
+      x: toLeft ? -50 : 50,
+      duration: 0.22,
+      stagger: 0.03,
+      ease: "power2.in",
+      onComplete: () => {
+        setDisplayed(active);
+      },
+    });
+  }, [active, displayed]);
+
+  useEffect(() => {
+    if (!listRef.current) return;
+    const items = listRef.current.querySelectorAll(".menu-item");
+    if (!isAnimating.current) return;
+    const fromLeft = displayed === "body";
+    gsap.fromTo(
+      items,
+      { opacity: 0, x: fromLeft ? 50 : -50 },
+      {
+        opacity: 1,
+        x: 0,
+        duration: 0.38,
+        stagger: 0.06,
+        ease: "power2.out",
+        onComplete: () => { isAnimating.current = false; },
+      }
+    );
+  }, [displayed]);
 
   return (
-    <section
-      id="menu"
-      className="py-28 px-6"
-      style={{ background: "#0d0d0d" }}
-    >
+    <section id="menu" className="py-28 px-6" style={{ background: "#0d0d0d" }}>
       <div className="max-w-4xl mx-auto">
         <SectionHeading en="Treatment Menu" ja="メニュー・料金" />
 
@@ -117,7 +149,9 @@ export default function Menu() {
                   ? "bg-gold text-obsidian border-gold"
                   : "bg-transparent text-cream/50 border-gold/30 hover:border-gold/60 hover:text-gold"
               }`}
-              onClick={() => setActive(cat)}
+              onClick={() => {
+                if (cat !== active && !isAnimating.current) setActive(cat);
+              }}
             >
               {cat === "facial" ? "Facial" : "Body"}
             </button>
@@ -125,8 +159,8 @@ export default function Menu() {
         </div>
 
         {/* List */}
-        <div ref={listRef} className="space-y-4">
-          {menus[active].map((item) => (
+        <div ref={listRef} className="space-y-4" style={{ overflow: "hidden" }}>
+          {menus[displayed].map((item) => (
             <div
               key={item.name}
               className="menu-item group border border-gold/15 p-6 hover:border-gold/40 transition-all duration-400"
