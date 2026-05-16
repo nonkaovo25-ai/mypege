@@ -113,11 +113,29 @@ export default function Hero() {
     <section
       ref={containerRef}
       className="relative h-screen flex flex-col items-center justify-center overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse at 50% 60%, #1a1400 0%, #0a0a0a 70%)",
-      }}
+      style={{ background: "#0a0a0a" }}
     >
+      {/* Background photo */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1920&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.22,
+        }}
+      />
+
+      {/* Dark overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 60%, rgba(26,20,0,0.6) 0%, rgba(10,10,10,0.92) 70%)",
+        }}
+      />
+
       {/* Gold vignette */}
       <div
         className="absolute inset-0 pointer-events-none"

@@ -47,33 +47,28 @@ export default function Access() {
         <SectionHeading en="Access" ja="アクセス・店舗情報" />
 
         <div className="access-inner grid md:grid-cols-2 gap-8 items-start">
-          {/* Map placeholder */}
+          {/* Map embed */}
           <div
             className="relative w-full overflow-hidden border border-gold/20"
-            style={{ paddingTop: "66%", background: "#111" }}
+            style={{ paddingTop: "66%" }}
           >
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-              <div
-                className="text-gold text-3xl"
-                style={{ fontFamily: "var(--font-serif)" }}
-              >
-                ✦
-              </div>
-              <p className="text-cream/30 text-sm tracking-widest">
-                東京都渋谷区神宮前
-              </p>
-              <p className="text-cream/20 text-xs tracking-wide">
-                表参道駅 徒歩3分
-              </p>
-              <a
-                href="https://maps.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 text-xs tracking-[0.2em] border border-gold/40 text-gold/70 px-5 py-2 hover:border-gold hover:text-gold transition-all duration-300 uppercase"
-              >
-                Google Map で開く
-              </a>
-            </div>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241.357!2d139.7100!3d35.6652!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188ca1f9381f0b%3A0x337328d4851c2f0!2z6KW_5Y2X6aeF5qCh!5e0!3m2!1sja!2sjp!4v1700000000000"
+              className="absolute inset-0 w-full h-full grayscale"
+              style={{ filter: "grayscale(1) invert(0.9) sepia(0.3) saturate(0.5) hue-rotate(10deg)", border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="サロンの地図"
+            />
+            <a
+              href="https://maps.google.com/?q=表参道駅"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-4 right-4 z-10 text-xs tracking-[0.2em] border border-gold/60 bg-obsidian/80 text-gold px-4 py-2 hover:border-gold hover:bg-obsidian transition-all duration-300 uppercase backdrop-blur-sm"
+            >
+              Google Map で開く
+            </a>
           </div>
 
           {/* Info */}
